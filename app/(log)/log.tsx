@@ -1,10 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-export default function MyFoodsScreen() {
+export default function LoggingScreen() {
   return (
     <View>
-      <Text>My Foods</Text>
+      <Text>Logging</Text>
     </View>
   );
 }
