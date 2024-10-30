@@ -43,17 +43,18 @@ export default function TodayScreen() {
 
 const styles = StyleSheet.create({
   sheet: {
-    marginTop: 100,
     margin: 24,
     gap: 24,
   },
   titleContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    borderRadius: 8,
+    padding: 12,
   },
   infoPanel: {
     marginTop: 24,
-    borderRadius: 4,
-    padding: 4,
+    borderRadius: 8,
+    padding: 12,
   },
 });
