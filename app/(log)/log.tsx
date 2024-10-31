@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View, StyleSheet, Button } from "react-native";
 import { Audio } from "expo-av";
+import { transcribeAudio } from "@/services/open-ai";
 
 export default function LoggingScreen() {
   const [listening, setListening] = React.useState(false);
@@ -37,7 +38,12 @@ export default function LoggingScreen() {
     const { sound, status } = await recording.createNewLoadedSoundAsync();
 
     const uri = recording.getURI();
-    sound.replayAsync();
+    if (uri) {
+      console.log(await transcribeAudio(uri));
+      sound.replayAsync();
+    } else {
+      console.error("NULL URI");
+    }
   };
 
   return (
