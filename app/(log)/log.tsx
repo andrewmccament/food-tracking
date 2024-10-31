@@ -1,12 +1,16 @@
 import React from "react";
 import { Text, View, StyleSheet, Button } from "react-native";
 import { Audio } from "expo-av";
-import { transcribeAudio } from "@/services/open-ai";
+import { parseMeal, transcribeAudio } from "@/services/open-ai";
+import MealSummary from "@/components/mealSummary";
+import { Meal } from "@/gpt-prompts/meal-parsing";
 
 export default function LoggingScreen() {
   const [listening, setListening] = React.useState(false);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const [recording, setRecording] = React.useState({} as Audio.Recording);
+  const [transcription, setTranscription] = React.useState();
+  const [meal, setMeal] = React.useState<Meal>();
 
   const startLogging = async () => {
     setListening(true);
@@ -35,12 +39,25 @@ export default function LoggingScreen() {
       allowsRecordingIOS: false,
     });
     await recording.stopAndUnloadAsync();
-    const { sound, status } = await recording.createNewLoadedSoundAsync();
+    //const { sound, status } = await recording.createNewLoadedSoundAsync();
 
     const uri = recording.getURI();
     if (uri) {
-      console.log(await transcribeAudio(uri));
-      sound.replayAsync();
+      const transcription = await transcribeAudio(uri);
+      if (transcription) {
+        setTranscription(transcription);
+        const response = await parseMeal(transcription);
+        console.log("foobar raw", response);
+        const jsonResponse = JSON.parse(response) as Meal;
+        if (!jsonResponse.followUpQuestion) {
+          console.log("foobar processed ", jsonResponse);
+          setMeal(jsonResponse);
+          console.log("i was supposed to set the meal", meal?.summary);
+        } else {
+          console.log(response.followUpQuestion);
+        }
+      }
+      //sound.replayAsync();
     } else {
       console.error("NULL URI");
     }
@@ -63,6 +80,8 @@ export default function LoggingScreen() {
           }}
         />
       )}
+      {transcription ? <Text>{transcription}</Text> : <></>}
+      {meal ? <MealSummary meal={meal} /> : <></>}
     </View>
   );
 }
