@@ -65,23 +65,27 @@ export default function LoggingScreen() {
 
   return (
     <View style={styles.container}>
-      {listening ? (
-        <Button
-          title="Stop Logging"
-          onPress={() => {
-            stopLogging();
-          }}
-        />
-      ) : (
-        <Button
-          title="Log"
-          onPress={() => {
-            startLogging();
-          }}
-        />
-      )}
-      {transcription ? <Text>{transcription}</Text> : <></>}
-      {meal ? <MealSummary meal={meal} /> : <></>}
+      <View style={styles.topSection}>
+        {meal ? <MealSummary meal={meal} /> : <></>}
+      </View>
+      <View style={styles.bottomSection}>
+        {transcription ? <Text>"{transcription}"</Text> : <></>}
+        {listening ? (
+          <Button
+            title="Stop Logging"
+            onPress={() => {
+              stopLogging();
+            }}
+          />
+        ) : (
+          <Button
+            title="Log"
+            onPress={() => {
+              startLogging();
+            }}
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -89,10 +93,18 @@ export default function LoggingScreen() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "column",
-    flexGrow: 1,
     height: "100%",
     width: "100%",
     justifyContent: "center",
     alignContent: "center",
+  },
+  topSection: {
+    flex: 1,
+    padding: 8,
+  },
+  bottomSection: {
+    height: "20%",
+    padding: 8,
+    justifyContent: "flex-start",
   },
 });

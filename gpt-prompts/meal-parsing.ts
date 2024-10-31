@@ -14,18 +14,20 @@ export type Meal = {
   recipes: Recipe[];
 };
 
+export type MacroNutrients = {
+  calories: number;
+  carbs: number;
+  fiber: number;
+  netCarbs: number;
+  protein: number;
+  fat: number;
+};
+
 export type Ingredient = {
   ingredientName: "string";
   unitName: "string";
-  amount: "number";
-  calories: "number";
-  macronutrients: {
-    carbs: "number";
-    fiber: "number";
-    netCarbs: "number";
-    protein: "number";
-    fat: "number";
-  };
+  amount: number;
+  macronutrients: MacroNutrients;
 };
 
 export type Recipe = {
@@ -76,8 +78,8 @@ json
       "ingredientName": "string",
       "unitName": "string",
       "amount": "number",
-      "calories": "number",
-      "macronutrients": {
+      "macronutrients": {      
+        "calories": "number",
         "carbs": "number",
         "fiber": "number",
         "netCarbs": "number",
@@ -94,8 +96,8 @@ json
           "ingredientName": "string",
           "unitName": "string",
           "amount": "number",
-          "calories": "number",
           "macronutrients": {
+            "calories": "number",
             "carbs": "number",
             "fiber": "number",
             "netCarbs": "number",
@@ -130,9 +132,9 @@ Always avoid null values by making informed guesses for missing details.
       "ingredientName": "spinach",
       "unitName": "cup",
       "amount": 2,
-      "calories": 14,
       "macronutrients": {
-        "carbs": 1.4,
+       
+      "calories": 14, "carbs": 1.4,
         "fiber": 0.9,
         "netCarbs": 0.5,
         "protein": 1.8,
@@ -143,9 +145,9 @@ Always avoid null values by making informed guesses for missing details.
       "ingredientName": "chicken breast",
       "unitName": "ounce",
       "amount": 4,
-      "calories": 187,
       "macronutrients": {
-        "carbs": 0,
+              "calories": 187,
+"carbs": 0,
         "fiber": 0,
         "netCarbs": 0,
         "protein": 35.3,
@@ -156,9 +158,9 @@ Always avoid null values by making informed guesses for missing details.
       "ingredientName": "avocado",
       "unitName": "half",
       "amount": 1,
-      "calories": 120,
       "macronutrients": {
-        "carbs": 6,
+              "calories": 120,
+"carbs": 6,
         "fiber": 4.9,
         "netCarbs": 1.1,
         "protein": 1.5,
@@ -188,9 +190,9 @@ Always avoid null values by making informed guesses for missing details.
           "ingredientName": "almond flour",
           "unitName": "cup",
           "amount": 1,
-          "calories": 160,
           "macronutrients": {
-            "carbs": 6,
+                      "calories": 160,
+"carbs": 6,
             "fiber": 3,
             "netCarbs": 3,
             "protein": 6,
@@ -201,9 +203,9 @@ Always avoid null values by making informed guesses for missing details.
           "ingredientName": "butter",
           "unitName": "tablespoon",
           "amount": 8,
-          "calories": 800,
           "macronutrients": {
-            "carbs": 0,
+                      "calories": 800,
+"carbs": 0,
             "fiber": 0,
             "netCarbs": 0,
             "protein": 0,
@@ -214,9 +216,9 @@ Always avoid null values by making informed guesses for missing details.
           "ingredientName": "egg",
           "unitName": "large",
           "amount": 3,
-          "calories": 216,
           "macronutrients": {
-            "carbs": 1.8,
+                      "calories": 216,
+"carbs": 1.8,
             "fiber": 0,
             "netCarbs": 1.8,
             "protein": 18,
@@ -227,9 +229,9 @@ Always avoid null values by making informed guesses for missing details.
           "ingredientName": "cocoa powder",
           "unitName": "tablespoon",
           "amount": 2,
-          "calories": 24,
           "macronutrients": {
-            "carbs": 5,
+                      "calories": 24,
+"carbs": 5,
             "fiber": 3,
             "netCarbs": 2,
             "protein": 1,
@@ -240,9 +242,9 @@ Always avoid null values by making informed guesses for missing details.
           "ingredientName": "sweetener",
           "unitName": "teaspoon",
           "amount": 4,
-          "calories": 0,
           "macronutrients": {
-            "carbs": 0,
+                      "calories": 0,
+"carbs": 0,
             "fiber": 0,
             "netCarbs": 0,
             "protein": 0,
