@@ -1,5 +1,12 @@
 import React from "react";
-import { Image, StyleSheet, Platform, ScrollView, Button } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Platform,
+  ScrollView,
+  Button,
+  View,
+} from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -7,7 +14,9 @@ import { router } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
 import { getSummedMacros } from "@/helpers/food-utils";
-import { Meal } from "@/gpt-prompts/meal-parsing";
+import { MacroNutrientEnum, Meal } from "@/gpt-prompts/meal-parsing";
+import MealSummary from "@/components/MealSummary";
+import { ProgressBar } from "@/components/ProgressBar";
 
 export default function TodayScreen() {
   const todaysMeals = useSelector((state: RootState) => state.food.todaysMeals);
@@ -15,39 +24,41 @@ export default function TodayScreen() {
 
   return (
     <ScrollView style={styles.sheet}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Today</ThemedText>
-        <Button title="Log" onPress={() => router.push("../(log)/log")} />
-      </ThemedView>
-      <ThemedView style={styles.infoPanel}>
-        <ThemedText>{`Calories: ${todayMacros.calories}/1850`}</ThemedText>
-        <ThemedText>{`Carbohydrates: ${todayMacros.carbs}/20`}</ThemedText>
-        <ThemedText>{`Protein: ${todayMacros.protein}/180g`}</ThemedText>
-        <ThemedText>{`Fat: ${todayMacros.fat}/150g`}</ThemedText>
-      </ThemedView>
-      {todaysMeals.map((meal: Meal) => (
+      <View style={styles.container}>
         <ThemedView style={styles.infoPanel}>
-          <ThemedText type="subtitle">
-            {meal.meal}
-            <ThemedText type="defaultSemiBold">{` (${
-              getSummedMacros([meal]).calories
-            } calories) `}</ThemedText>
-          </ThemedText>
-          <ThemedText>{meal.summary}</ThemedText>
+          <ProgressBar
+            macro={MacroNutrientEnum.calories}
+            amount={todayMacros.calories}
+          />
+          <ProgressBar
+            macro={MacroNutrientEnum.netCarbs}
+            amount={todayMacros.netCarbs}
+          />
+          <ProgressBar macro={MacroNutrientEnum.fat} amount={todayMacros.fat} />
+          <ProgressBar
+            macro={MacroNutrientEnum.protein}
+            amount={todayMacros.protein}
+          />
         </ThemedView>
-      ))}
+        {todaysMeals.map((meal: Meal) => (
+          <MealSummary meal={meal} />
+        ))}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   sheet: {
-    margin: 24,
-    gap: 24,
+    backgroundColor: "#D5E1E1",
+  },
+  container: {
+    marginHorizontal: 24,
   },
   titleContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     borderRadius: 8,
     padding: 12,
   },

@@ -23,6 +23,15 @@ export type MacroNutrients = {
   fat: number;
 };
 
+export enum MacroNutrientEnum {
+  calories = "calories",
+  carbs = "carbs",
+  fiber = "fiber",
+  netCarbs = "netCarbs",
+  protein = "protein",
+  fat = "fat",
+}
+
 export type Ingredient = {
   ingredientName: "string";
   unitName: "string";

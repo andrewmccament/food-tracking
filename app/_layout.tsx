@@ -20,6 +20,10 @@ export default function RootLayout() {
             name="(log)/log"
             options={{ headerShown: true, title: "Log Food" }}
           />
+          <Stack.Screen
+            name="(editMeal)/editMeal"
+            options={{ headerShown: true, title: "Edit Meal" }}
+          />
         </Stack>
       </Provider>
     </>
