@@ -4,6 +4,9 @@ import { Audio } from "expo-av";
 import { parseMeal, transcribeAudio } from "@/services/open-ai";
 import MealSummary from "@/components/mealSummary";
 import { Meal } from "@/gpt-prompts/meal-parsing";
+import { RootState } from "@/state/store";
+import { useSelector, useDispatch } from "react-redux";
+import { logMeal } from "@/state/foodSlice";
 
 export default function LoggingScreen() {
   const [listening, setListening] = React.useState(false);
@@ -11,6 +14,14 @@ export default function LoggingScreen() {
   const [recording, setRecording] = React.useState({} as Audio.Recording);
   const [transcription, setTranscription] = React.useState();
   const [meal, setMeal] = React.useState<Meal>();
+  const todaysMeals = useSelector((state: RootState) => state.food.todaysMeals);
+  const dispatch = useDispatch();
+
+  const addMeal = () => {
+    if (meal) {
+      dispatch(logMeal(meal));
+    }
+  };
 
   const startLogging = async () => {
     setListening(true);
@@ -85,6 +96,7 @@ export default function LoggingScreen() {
             }}
           />
         )}
+        {meal ? <Button title="Add meal" onPress={() => addMeal()} /> : <></>}
       </View>
     </View>
   );
