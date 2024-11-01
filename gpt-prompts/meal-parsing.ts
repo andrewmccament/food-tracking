@@ -2,6 +2,7 @@ export type Meal = {
   mealId: string; //uuid
   isAdded?: boolean;
   followUpQuestion?: string;
+  date: string;
   meal:
     | "Breakfast"
     | "Snack before lunch"

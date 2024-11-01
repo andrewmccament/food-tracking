@@ -19,9 +19,13 @@ import MealSummary from "@/components/MealSummary";
 import { ProgressBar } from "@/components/ProgressBar";
 
 export default function TodayScreen() {
+  const date = new Date();
+  const todayDate = `${date.getFullYear()}${
+    date.getMonth() + 1
+  }${date.getDate()}`;
   const todaysMeals = useSelector(
     (state: RootState) => state.food.todaysMeals
-  ).filter((meal) => meal?.isAdded);
+  ).filter((meal) => meal?.isAdded && meal?.date === todayDate);
   const todayMacros = getSummedMacros(todaysMeals);
 
   return (

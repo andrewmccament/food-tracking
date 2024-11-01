@@ -56,9 +56,11 @@ export const parseMeal = async (input: string) => {
         },
       }
     );
+    const date = new Date();
     return {
       ...(JSON.parse(response.data.choices[0].message.content) as Meal),
       mealId: Crypto.randomUUID(),
+      date: `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`,
     };
   } catch (err) {
     console.error("Transcription failed: ", err);

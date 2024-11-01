@@ -75,6 +75,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
         const jsonResponse = response;
         if (jsonResponse) {
           if (jsonResponse.mealId) {
+            console.log(jsonResponse.date);
             dispatch(recordMeal(jsonResponse));
 
             setMeal(jsonResponse);
