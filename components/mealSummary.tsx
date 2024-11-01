@@ -12,11 +12,25 @@ import React from "react";
 import { View, Text, StyleSheet, ScrollView, Button } from "react-native";
 import { ProgressBar } from "./ProgressBar";
 import { ThemedText } from "./ThemedText";
-import { ThemedView } from "./ThemedView";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/state/store";
 
-export default function MealSummary({ meal }: Meal) {
-  console.log(meal);
+export type MealSummaryProps = {
+  mealId: string;
+  allowAdding?: boolean;
+  onAdd?: () => void;
+};
+
+export default function MealSummary({
+  mealId,
+  allowAdding,
+  onAdd,
+}: MealSummaryProps) {
   const [expanded, setExpanded] = React.useState(false);
+  const meal = useSelector((state: RootState) => state.food.todaysMeals).find(
+    (meal: Meal) => meal.mealId === mealId
+  );
+
   const MacroBreakdown = ({ macros }: MacroNutrients) => {
     return (
       <View>
@@ -40,21 +54,32 @@ export default function MealSummary({ meal }: Meal) {
             MacroNutrientEnum.calories
           )}) `}</ThemedText>
         </ThemedText>
-        <Button
-          title="Edit"
-          onPress={() => {
-            router.push("../(editMeal)/editMeal");
-          }}
-        />
+        <View style={styles.row}>
+          <Button
+            title="Edit"
+            onPress={() => {
+              router.push({
+                pathname: "../(editMeal)/editMeal",
+                params: { mealId: meal.mealId },
+              });
+            }}
+          />
+          {allowAdding && <Button title="Add" onPress={() => onAdd()} />}
+        </View>
       </View>
       <ThemedText>{meal.summary}</ThemedText>
       {expanded && (
         <ScrollView style={styles.ingredientList}>
           {meal.ingredients.map((ingredient) => (
             <View style={styles.ingredient}>
-              <ThemedText type="defaultSemiBold">
-                {capFirstLetter(ingredient.ingredientName)}
-              </ThemedText>
+              <View style={styles.row}>
+                <ThemedText type="defaultSemiBold">
+                  {capFirstLetter(ingredient.ingredientName)}
+                </ThemedText>
+                <ThemedText type="default">
+                  {` ${ingredient.amount} ${ingredient.unitName}`}
+                </ThemedText>
+              </View>
               <MacroBreakdown macros={ingredient.macronutrients} />
             </View>
           ))}
@@ -83,6 +108,9 @@ const styles = StyleSheet.create({
   },
   column: {
     flexDirection: "column",
+  },
+  row: {
+    flexDirection: "row",
   },
   infoPanel: {
     backgroundColor: "#ffffff",

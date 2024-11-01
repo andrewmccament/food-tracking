@@ -19,7 +19,9 @@ import MealSummary from "@/components/MealSummary";
 import { ProgressBar } from "@/components/ProgressBar";
 
 export default function TodayScreen() {
-  const todaysMeals = useSelector((state: RootState) => state.food.todaysMeals);
+  const todaysMeals = useSelector(
+    (state: RootState) => state.food.todaysMeals
+  ).filter((meal) => meal.isAdded);
   const todayMacros = getSummedMacros(todaysMeals);
 
   return (
@@ -41,7 +43,7 @@ export default function TodayScreen() {
           />
         </ThemedView>
         {todaysMeals.map((meal: Meal) => (
-          <MealSummary meal={meal} />
+          <MealSummary mealId={meal.mealId} />
         ))}
       </View>
     </ScrollView>

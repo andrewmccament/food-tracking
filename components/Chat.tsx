@@ -10,9 +10,11 @@ import {
 import { Audio } from "expo-av";
 import { parseMeal, transcribeAudio } from "@/services/open-ai";
 import { Meal } from "@/gpt-prompts/meal-parsing";
+import { recordMeal } from "@/state/foodSlice";
+import { useSelector, useDispatch } from "react-redux";
 
 export type ChatProps = {
-  onMealRetrieval: (meal: Meal) => void;
+  onMealRetrieval: (mealId: string) => void;
 };
 
 enum MessageFrom {
@@ -32,6 +34,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
   const [recording, setRecording] = React.useState({} as Audio.Recording);
   const [transcription, setTranscription] = React.useState();
   const [meal, setMeal] = React.useState<Meal>();
+  const dispatch = useDispatch();
 
   const startLogging = async () => {
     setListening(true);
@@ -70,27 +73,29 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
           previous.concat({ from: MessageFrom.USER, contents: transcription })
         );
         const response = await parseMeal(transcription);
-        const jsonResponse = JSON.parse(response) as Meal;
-        if (!jsonResponse.followUpQuestion) {
-          setMeal(jsonResponse);
-          onMealRetrieval(jsonResponse);
-          setMessages((previous) =>
-            previous.concat({
-              from: MessageFrom.GPT,
-              contents: jsonResponse.motivation,
-            })
-          );
-        } else {
-          setMessages((previous) =>
-            previous.concat({
-              from: MessageFrom.GPT,
-              contents: jsonResponse.followUpQuestion as string,
-            })
-          );
+        const jsonResponse = response;
+        if (jsonResponse) {
+          if (jsonResponse.mealId) {
+            dispatch(recordMeal(jsonResponse));
+
+            setMeal(jsonResponse);
+            onMealRetrieval(jsonResponse.mealId);
+            setMessages((previous) =>
+              previous.concat({
+                from: MessageFrom.GPT,
+                contents: jsonResponse.motivation,
+              })
+            );
+          } else {
+            setMessages((previous) =>
+              previous.concat({
+                from: MessageFrom.GPT,
+                contents: jsonResponse.followUpQuestion as string,
+              })
+            );
+          }
         }
       }
-      console.log(messages);
-      //sound.replayAsync();
     } else {
       console.error("NULL URI");
     }

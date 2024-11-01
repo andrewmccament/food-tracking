@@ -20,6 +20,9 @@ export const getSummedMacros = (meals: Meal[]) => {
       }
     }
   }
+  for (let key of keys) {
+    totals[key] = Math.round(totals[key]);
+  }
   console.log("totals", totals);
   return totals;
 };

@@ -8,31 +8,32 @@ import { RootState } from "@/state/store";
 import { useSelector, useDispatch } from "react-redux";
 import { logMeal } from "@/state/foodSlice";
 import { Chat } from "@/components/Chat";
+import { router } from "expo-router";
 
 export default function LoggingScreen() {
-  const [listening, setListening] = React.useState(false);
-  const [permissionResponse, requestPermission] = Audio.usePermissions();
-  const [recording, setRecording] = React.useState({} as Audio.Recording);
-  const [transcription, setTranscription] = React.useState();
-  const [meal, setMeal] = React.useState<Meal>();
-  const todaysMeals = useSelector((state: RootState) => state.food.todaysMeals);
+  const [mealId, setMealId] = React.useState<Meal>();
   const dispatch = useDispatch();
 
   const addMeal = () => {
-    if (meal) {
-      dispatch(logMeal(meal));
+    if (mealId) {
+      dispatch(logMeal(mealId));
+      router.back();
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
-        {meal ? <MealSummary meal={meal} /> : <></>}
+        {mealId ? (
+          <MealSummary mealId={mealId} allowAdding onAdd={() => addMeal()} />
+        ) : (
+          <></>
+        )}
       </View>
       <View style={styles.bottomSection}>
         <Chat
-          onMealRetrieval={(meal) => {
-            setMeal(meal);
+          onMealRetrieval={(mealId) => {
+            setMealId(mealId);
           }}
         />
       </View>
@@ -50,10 +51,10 @@ const styles = StyleSheet.create({
   },
   topSection: {
     padding: 8,
-    height: "50%",
+    height: "45%",
   },
   bottomSection: {
-    height: "50%",
+    height: "45%",
     padding: 8,
     justifyContent: "flex-start",
   },

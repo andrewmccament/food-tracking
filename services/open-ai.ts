@@ -1,6 +1,7 @@
 import axios from "axios";
-import { MEAL_PARSING_PROMPT } from "../gpt-prompts/meal-parsing";
+import { Meal, MEAL_PARSING_PROMPT } from "../gpt-prompts/meal-parsing";
 const AUTHORIZATION = `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`;
+import * as Crypto from "expo-crypto";
 
 export const transcribeAudio = async (audioUri: string) => {
   const formData = new FormData();
@@ -57,7 +58,10 @@ export const parseMeal = async (input: string) => {
         },
       }
     );
-    return response.data.choices[0].message.content;
+    return {
+      ...(JSON.parse(response.data.choices[0].message.content) as Meal),
+      mealId: Crypto.randomUUID(),
+    };
   } catch (err) {
     console.error("Transcription failed: ", err);
     return null;

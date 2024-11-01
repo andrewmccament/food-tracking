@@ -1,4 +1,6 @@
 export type Meal = {
+  mealId: string; //uuid
+  isAdded?: boolean;
   followUpQuestion?: string;
   meal:
     | "Breakfast"
@@ -271,7 +273,7 @@ Always avoid null values by making informed guesses for missing details.
 Respond in ready-to-parse JSON format without any code block formatting or json tags.
 
 # Notes
-
+- Always return amounts in standard volume based units, convert if needed.  Handful -> quarter cup for example.
 - If user input lacks information, provide clarifying questions.
 - Custom recipe data should be collected without immediately recording consumption of all ingredients.
 - Include nutritional data for recipe ingredients to ensure consistency with meal ingredient data.

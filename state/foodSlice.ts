@@ -14,14 +14,27 @@ export const foodSlice = createSlice({
   name: "food",
   initialState,
   reducers: {
-    logMeal: (state, action: PayloadAction<Meal>) => {
+    recordMeal: (state, action: PayloadAction<Meal>) => {
+      // record just adds the meal to the array so it can be edited
       state.todaysMeals = state.todaysMeals.concat(action.payload);
-      console.log(state.todaysMeals);
+    },
+    logMeal: (state, action: PayloadAction<string>) => {
+      // log meal makes it visible in today
+      const mealIndex = state.todaysMeals.findIndex(
+        (meal) => meal.mealId !== action.payload
+      );
+      state.todaysMeals[mealIndex].isAdded = true;
+      state.todaysMeals = state.todaysMeals.filter((meal) => meal.isAdded);
+    },
+    removeMeal: (state, action: PayloadAction<string>) => {
+      state.todaysMeals = state.todaysMeals.filter(
+        (meal) => meal.mealId !== action.payload
+      );
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { logMeal } = foodSlice.actions;
+export const { recordMeal, logMeal, removeMeal } = foodSlice.actions;
 
 export default foodSlice.reducer;
