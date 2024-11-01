@@ -36,8 +36,8 @@ export enum MacroNutrientEnum {
 
 export type Ingredient = {
   ingredientName: "string";
-  unitName: "string";
-  amount: number;
+  unitName?: "string";
+  amount?: number;
   macronutrients: MacroNutrients;
 };
 

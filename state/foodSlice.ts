@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { Meal } from "@/gpt-prompts/meal-parsing";
+import { Ingredient, Meal } from "@/gpt-prompts/meal-parsing";
 
 export interface foodState {
   todaysMeals: Meal[];
@@ -40,10 +40,62 @@ export const foodSlice = createSlice({
         (meal) => meal.mealId !== action.payload
       );
     },
+    addIngredient: (state, action: PayloadAction<string>) => {
+      const mealIndex = state.todaysMeals.findIndex(
+        (meal) => meal.mealId === action.payload
+      );
+      const meal = state.todaysMeals[mealIndex];
+      meal.ingredients.push({
+        ingredientName: "New Ingredient",
+        macronutrients: {
+          calories: 0,
+          carbs: 0,
+          netCarbs: 0,
+          fiber: 0,
+          fat: 0,
+          protein: 0,
+        },
+      });
+      state.todaysMeals[mealIndex] = meal;
+    },
+    removeIngredient: (
+      state,
+      action: PayloadAction<{ mealId: string; ingredientIndex: number }>
+    ) => {
+      const mealIndex = state.todaysMeals.findIndex(
+        (meal) => meal.mealId === action.payload.mealId
+      );
+      const meal = state.todaysMeals[mealIndex];
+      meal.ingredients.splice(action.payload.ingredientIndex, 1);
+      state.todaysMeals[mealIndex] = meal;
+    },
+    updateIngredient: (
+      state,
+      action: PayloadAction<{
+        mealId: string;
+        ingredientIndex: number;
+        ingredient: Ingredient;
+      }>
+    ) => {
+      const mealIndex = state.todaysMeals.findIndex(
+        (meal) => meal.mealId === action.payload.mealId
+      );
+      const meal = state.todaysMeals[mealIndex];
+      meal.ingredients[action.payload.ingredientIndex] =
+        action.payload.ingredient;
+      state.todaysMeals[mealIndex] = meal;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { recordMeal, logMeal, removeMeal } = foodSlice.actions;
+export const {
+  recordMeal,
+  logMeal,
+  removeMeal,
+  addIngredient,
+  removeIngredient,
+  updateIngredient,
+} = foodSlice.actions;
 
 export default foodSlice.reducer;

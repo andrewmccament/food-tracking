@@ -26,6 +26,10 @@ export default function RootLayout() {
               name="(editMeal)/editMeal"
               options={{ headerShown: true, title: "Edit Meal" }}
             />
+            <Stack.Screen
+              name="(editIngredient)/editIngredient"
+              options={{ headerShown: true, title: "Edit Ingredient" }}
+            />
           </Stack>
         </PersistGate>
       </Provider>

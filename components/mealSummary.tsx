@@ -21,6 +21,19 @@ export type MealSummaryProps = {
   onAdd?: () => void;
 };
 
+export type MacroBreakdownProps = { macros: MacroNutrients };
+export const MacroBreakdown = ({ macros }: MacroBreakdownProps) => {
+  return (
+    <View>
+      {Object.keys(macros).map((macro) => (
+        <View>
+          <ProgressBar macro={macro} amount={macros[macro]} />
+        </View>
+      ))}
+    </View>
+  );
+};
+
 export default function MealSummary({
   mealId,
   allowAdding,
@@ -30,18 +43,6 @@ export default function MealSummary({
   const meal = useSelector((state: RootState) => state.food.todaysMeals).find(
     (meal: Meal) => meal.mealId === mealId
   );
-
-  const MacroBreakdown = ({ macros }: MacroNutrients) => {
-    return (
-      <View>
-        {Object.keys(macros).map((macro) => (
-          <View>
-            <ProgressBar macro={macro} amount={macros[macro]} />
-          </View>
-        ))}
-      </View>
-    );
-  };
 
   return meal ? (
     <View style={styles.infoPanel}>
@@ -77,7 +78,7 @@ export default function MealSummary({
                   {capFirstLetter(ingredient.ingredientName)}
                 </ThemedText>
                 <ThemedText type="default">
-                  {` ${ingredient.amount} ${ingredient.unitName}`}
+                  {` ${ingredient.amount ?? ""} ${ingredient.unitName ?? ""}`}
                 </ThemedText>
               </View>
               <MacroBreakdown macros={ingredient.macronutrients} />

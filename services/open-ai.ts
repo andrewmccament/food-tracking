@@ -31,8 +31,6 @@ export const transcribeAudio = async (audioUri: string) => {
 };
 
 export const parseMeal = async (input: string) => {
-  const formData = new FormData();
-  formData.append("model", "gpt-3.5-turbo");
   const messages = [
     {
       role: "system",
