@@ -21,7 +21,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 export default function TodayScreen() {
   const todaysMeals = useSelector(
     (state: RootState) => state.food.todaysMeals
-  ).filter((meal) => meal.isAdded);
+  ).filter((meal) => meal?.isAdded);
   const todayMacros = getSummedMacros(todaysMeals);
 
   return (

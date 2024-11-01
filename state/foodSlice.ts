@@ -21,10 +21,19 @@ export const foodSlice = createSlice({
     logMeal: (state, action: PayloadAction<string>) => {
       // log meal makes it visible in today
       const mealIndex = state.todaysMeals.findIndex(
-        (meal) => meal.mealId !== action.payload
+        (meal) => meal.mealId === action.payload
       );
-      state.todaysMeals[mealIndex].isAdded = true;
-      state.todaysMeals = state.todaysMeals.filter((meal) => meal.isAdded);
+      console.log(state.todaysMeals);
+      console.log(mealIndex);
+      if (mealIndex >= 0) {
+        state.todaysMeals[mealIndex].isAdded = true;
+        state.todaysMeals = state.todaysMeals.filter((meal) => meal.isAdded);
+      } else {
+        console.error(
+          "Failed to find meal with id " + action.payload,
+          state.todaysMeals
+        );
+      }
     },
     removeMeal: (state, action: PayloadAction<string>) => {
       state.todaysMeals = state.todaysMeals.filter(

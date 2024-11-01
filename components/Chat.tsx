@@ -40,7 +40,6 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
     setListening(true);
     try {
       if (permissionResponse?.status !== "granted") {
-        console.log("waiting for permission");
         await requestPermission();
       }
       Audio.setAudioModeAsync({
