@@ -13,7 +13,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { router } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
-import { getSummedMacros } from "@/helpers/food-utils";
+import { getSummedMacros, sortMealsByCategory } from "@/helpers/food-utils";
 import { MacroNutrientEnum, Meal } from "@/gpt-prompts/meal-parsing";
 import MealSummary from "@/components/MealSummary";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -23,9 +23,10 @@ export default function TodayScreen() {
   const todayDate = `${date.getFullYear()}${
     date.getMonth() + 1
   }${date.getDate()}`;
-  const todaysMeals = useSelector(
+  let todaysMeals = useSelector(
     (state: RootState) => state.food.todaysMeals
   ).filter((meal) => meal?.isAdded && meal?.date === todayDate);
+  todaysMeals = sortMealsByCategory(todaysMeals);
   const todayMacros = getSummedMacros(todaysMeals);
 
   return (
