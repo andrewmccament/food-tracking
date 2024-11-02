@@ -11,47 +11,54 @@ import { Chat } from "@/components/Chat";
 import { router } from "expo-router";
 
 export default function LoggingScreen() {
-  const [mealId, setMealId] = React.useState<string>();
+  const mealId = React.useRef<string>();
+  const [mealIdChanged, setMealIdChanged] = React.useState<string>();
   const userAddedMeal = React.useRef(false);
   const dispatch = useDispatch();
 
   const addMeal = () => {
-    if (mealId) {
+    if (mealId.current) {
       userAddedMeal.current = true;
-      dispatch(logMeal(mealId));
+      dispatch(logMeal(mealId.current));
       router.back();
     }
   };
 
   React.useEffect(() => {
     return () => {
-      console.log("unmount", userAddedMeal, mealId);
-      if (mealId && userAddedMeal.current == false) {
+      console.log("unmount", userAddedMeal, mealId.current);
+      if (mealId.current && userAddedMeal.current == false) {
         Alert.alert("Did you want to save the meal or discard?", "", [
           {
             text: "Discard",
             onPress: () => {},
             style: "cancel",
           },
-          { text: "Save", onPress: () => dispatch(logMeal(mealId)) },
+          { text: "Save", onPress: () => dispatch(logMeal(mealId.current)) },
         ]);
       }
     };
-  }, [mealId]);
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
-        {mealId ? (
-          <MealSummary mealId={mealId} allowAdding onAdd={() => addMeal()} />
+        {mealId.current ? (
+          <MealSummary
+            mealId={mealId.current}
+            allowAdding
+            onAdd={() => addMeal()}
+            expandedByDefault
+          />
         ) : (
           <></>
         )}
       </View>
       <View style={styles.bottomSection}>
         <Chat
-          onMealRetrieval={(mealId) => {
-            setMealId(mealId);
+          onMealRetrieval={(thisMealId) => {
+            mealId.current = thisMealId;
+            setMealIdChanged(thisMealId);
           }}
         />
       </View>

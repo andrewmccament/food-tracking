@@ -6,6 +6,7 @@ import {
   ScrollView,
   Button,
   View,
+  Text,
 } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -30,36 +31,73 @@ export default function TodayScreen() {
   const todayMacros = getSummedMacros(todaysMeals);
 
   return (
-    <ScrollView style={styles.sheet}>
-      <View style={styles.container}>
-        <ThemedView style={styles.infoPanel}>
-          <ProgressBar
-            macro={MacroNutrientEnum.calories}
-            amount={todayMacros.calories}
-          />
-          <ProgressBar
-            macro={MacroNutrientEnum.netCarbs}
-            amount={todayMacros.netCarbs}
-          />
-          <ProgressBar macro={MacroNutrientEnum.fat} amount={todayMacros.fat} />
-          <ProgressBar
-            macro={MacroNutrientEnum.protein}
-            amount={todayMacros.protein}
-          />
-        </ThemedView>
-        {todaysMeals.map((meal: Meal) => (
-          <MealSummary mealId={meal.mealId} />
-        ))}
+    <View style={styles.todayContainer}>
+      <ScrollView style={styles.todayListContainer}>
+        <View style={styles.todayListContainer}>
+          <ThemedView style={styles.infoPanel}>
+            <ProgressBar
+              macro={MacroNutrientEnum.calories}
+              amount={todayMacros.calories}
+            />
+            <ProgressBar
+              macro={MacroNutrientEnum.netCarbs}
+              amount={todayMacros.netCarbs}
+            />
+            <ProgressBar
+              macro={MacroNutrientEnum.fat}
+              amount={todayMacros.fat}
+            />
+            <ProgressBar
+              macro={MacroNutrientEnum.protein}
+              amount={todayMacros.protein}
+            />
+          </ThemedView>
+          {todaysMeals.map((meal: Meal) => (
+            <MealSummary mealId={meal.mealId} />
+          ))}
+        </View>
+      </ScrollView>
+      <View style={styles.logButtonContainer}>
+        <View
+          style={styles.logButton}
+          onTouchEnd={() => router.push("../(log)/log")}
+        >
+          <Text style={styles.logButtonText}>Log</Text>
+        </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sheet: {
+  todayContainer: {
+    flexDirection: "column",
+    flex: 1,
     backgroundColor: "#D5E1E1",
   },
-  container: {
+  todayListContainer: {
+    flex: 1,
+  },
+  logButtonContainer: {
+    height: 50,
+    marginBottom: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logButton: {
+    borderColor: "#22C2F1",
+    borderWidth: 1,
+    width: 150,
+    height: 60,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logButtonText: {
+    fontSize: 20,
+    color: "black",
+  },
+  todayList: {
     marginHorizontal: 24,
   },
   titleContainer: {
@@ -70,7 +108,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   infoPanel: {
-    marginTop: 24,
+    marginTop: 12,
     borderRadius: 8,
     padding: 12,
   },

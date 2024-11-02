@@ -34,14 +34,9 @@ export const sortMealsByCategory = (meals: Meal[]) => {
     "lunch",
     "snack before dinner",
     "dinner",
-    "midnight Snack",
+    "midnight snack",
   ];
-  console.log(meals);
   return meals.sort((meal1, meal2) => {
-    console.log(
-      meal1.meal,
-      mealRanking.findIndex((str) => str === meal1.meal.toLowerCase())
-    );
     return (
       mealRanking.findIndex((str) => str === meal1.meal.toLowerCase()) -
       mealRanking.findIndex((str) => str === meal2.meal.toLowerCase())
