@@ -54,6 +54,7 @@ export default function EditIngredientScreen() {
         onSubmitEditing={(event) => searchFood(event.nativeEvent.text)}
         style={styles.searchBox}
         onChangeText={editIngredientName}
+        clearButtonMode={"always"}
       >
         {capFirstLetter(thisIngredient?.ingredientName)}
       </TextInput>

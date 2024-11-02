@@ -23,8 +23,6 @@ export const foodSlice = createSlice({
       const mealIndex = state.todaysMeals.findIndex(
         (meal) => meal.mealId === action.payload
       );
-      console.log(state.todaysMeals);
-      console.log(mealIndex);
       if (mealIndex >= 0) {
         state.todaysMeals[mealIndex].isAdded = true;
         state.todaysMeals = state.todaysMeals.filter((meal) => meal.isAdded);
