@@ -60,8 +60,8 @@ export default function EditIngredientScreen() {
       </TextInput>
       <MacroBreakdown macros={thisIngredient?.macronutrients} />
       <View style={styles.macroEditingList}>
-        {Object.keys(thisIngredient?.macronutrients).map((macro) => (
-          <View style={styles.macroEditor}>
+        {Object.keys(thisIngredient?.macronutrients).map((macro, index) => (
+          <View style={styles.macroEditor} key={index}>
             <Text>{getPrettyNameForMacro(macro)}</Text>
             <TextInput
               onChangeText={(text) => updateMacro(macro, text)}

@@ -36,7 +36,7 @@ export default function EditMealScreen() {
         <Text style={styles.summary}>{meal?.summary}</Text>
         <Button title="Add ingredient..." onPress={() => addNewIngredient()} />
         {meal?.ingredients.map((ingredient, index) => (
-          <View style={styles.row}>
+          <View style={styles.row} key={index}>
             <View
               style={styles.ingredient}
               onTouchEnd={() =>

@@ -30,7 +30,9 @@ export const transcribeAudio = async (audioUri: string) => {
   }
 };
 
-export const parseMeal = async (input: string) => {
+export type ParseMealResponse = Promise<Meal | { error: string }>;
+
+export const parseMeal = async (input: string): ParseMealResponse => {
   const messages = [
     {
       role: "system",
@@ -57,13 +59,20 @@ export const parseMeal = async (input: string) => {
       }
     );
     const date = new Date();
-    return {
-      ...(JSON.parse(response.data.choices[0].message.content) as Meal),
-      mealId: Crypto.randomUUID(),
-      date: `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`,
-    };
+    try {
+      const meal = JSON.parse(response.data.choices[0].message.content) as Meal;
+      if (!(meal.ingredients?.length > 0 && !meal.followUpQuestion)) {
+        throw new Error("Tried to record an invalid meal");
+      }
+      return {
+        ...meal,
+        mealId: Crypto.randomUUID(),
+        date: `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`,
+      };
+    } catch (err) {
+      return { error: `${err}` };
+    }
   } catch (err) {
-    console.error("Transcription failed: ", err);
-    return null;
+    return { error: `${err}` };
   }
 };

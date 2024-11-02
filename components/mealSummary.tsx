@@ -34,8 +34,8 @@ export type MacroBreakdownProps = { macros: MacroNutrients };
 export const MacroBreakdown = ({ macros }: MacroBreakdownProps) => {
   return (
     <View>
-      {Object.keys(macros).map((macro) => (
-        <View>
+      {Object.keys(macros).map((macro, index) => (
+        <View key={index}>
           <ProgressBar macro={macro} amount={macros[macro]} />
         </View>
       ))}
@@ -96,8 +96,8 @@ export default function MealSummary({
       <ThemedText>{meal.summary}</ThemedText>
       {expanded && (
         <ScrollView style={styles.ingredientList}>
-          {meal.ingredients.map((ingredient) => (
-            <View style={styles.ingredient}>
+          {meal.ingredients.map((ingredient, index) => (
+            <View style={styles.ingredient} key={index}>
               <View style={styles.row}>
                 <ThemedText type="defaultSemiBold">
                   {capFirstLetter(ingredient.ingredientName)}

@@ -12,12 +12,13 @@ import { parseMeal, transcribeAudio } from "@/services/open-ai";
 import { Meal } from "@/gpt-prompts/meal-parsing";
 import { recordMeal } from "@/state/foodSlice";
 import { useSelector, useDispatch } from "react-redux";
+import { Message } from "./Message";
 
 export type ChatProps = {
   onMealRetrieval: (mealId: string) => void;
 };
 
-enum MessageFrom {
+export enum MessageFrom {
   USER = "Andrew",
   GPT = "Nourishly",
 }
@@ -62,6 +63,9 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       recording.current = currentRecording;
+      setMessages((previous) =>
+        previous.concat({ from: MessageFrom.USER, contents: "..." })
+      );
     } catch (err) {
       console.error(err);
     }
@@ -76,7 +80,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
     try {
       await recording.current?.stopAndUnloadAsync();
     } catch (err) {
-      console.warn(`Failed to unload recording: ${err}`);
+      console.info(`Failed to unload recording: ${err}`);
       return;
     }
 
@@ -84,33 +88,44 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
       const uri = recording.current.getURI();
       if (uri) {
         const transcription = await transcribeAudio(uri);
+
         if (transcription) {
           setTranscription(transcription);
-          setMessages((previous) =>
-            previous.concat({ from: MessageFrom.USER, contents: transcription })
-          );
+          setMessages((previous) => {
+            return previous
+              .slice(0, -1)
+              .concat({ from: MessageFrom.USER, contents: transcription })
+              .concat({ from: MessageFrom.GPT, contents: "..." });
+          });
           const response = await parseMeal(transcription);
-          const jsonResponse = response;
-          if (jsonResponse) {
-            if (jsonResponse.mealId) {
-              dispatch(recordMeal(jsonResponse));
+          console.log(response);
+          if (!response?.error) {
+            if (response.mealId) {
+              dispatch(recordMeal(response));
 
-              setMeal(jsonResponse);
-              onMealRetrieval(jsonResponse.mealId);
+              setMeal(response);
+              onMealRetrieval(response.mealId);
               setMessages((previous) =>
-                previous.concat({
+                previous.slice(0, -1).concat({
                   from: MessageFrom.GPT,
-                  contents: jsonResponse.motivation,
+                  contents: response.motivation,
                 })
               );
             } else {
               setMessages((previous) =>
-                previous.concat({
+                previous.slice(0, -1).concat({
                   from: MessageFrom.GPT,
-                  contents: jsonResponse.followUpQuestion as string,
+                  contents: response.followUpQuestion as string,
                 })
               );
             }
+          } else {
+            setMessages((previous) =>
+              previous.slice(0, -1).concat({
+                from: MessageFrom.GPT,
+                contents: `I'm sorry, I didn't quite get that.  Can you try again please?`,
+              })
+            );
           }
         }
       } else {
@@ -120,11 +135,9 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
   };
   return (
     <View style={styles.container}>
-      <ScrollView>
-        {messages.map((message) => (
-          <Text
-            style={styles.text}
-          >{`${message.from}: ${message.contents}`}</Text>
+      <ScrollView style={styles.messages}>
+        {messages.map((message, index) => (
+          <Message from={message.from} content={message.contents} key={index} />
         ))}
       </ScrollView>
       <TextInput />
@@ -157,5 +170,8 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "white",
+  },
+  messages: {
+    flexDirection: "column-reverse",
   },
 });

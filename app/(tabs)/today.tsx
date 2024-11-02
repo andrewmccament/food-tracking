@@ -52,8 +52,8 @@ export default function TodayScreen() {
               amount={todayMacros.protein}
             />
           </ThemedView>
-          {todaysMeals.map((meal: Meal) => (
-            <MealSummary mealId={meal.mealId} />
+          {todaysMeals.map((meal: Meal, index) => (
+            <MealSummary mealId={meal.mealId} key={index}/>
           ))}
         </View>
       </ScrollView>
