@@ -1,5 +1,4 @@
 import { MacroNutrients, Meal } from "@/gpt-prompts/meal-parsing";
-import React from "react";
 
 export const getSummedMacros = (meals: Meal[]) => {
   let totals: MacroNutrients = {

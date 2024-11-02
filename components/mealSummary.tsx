@@ -1,5 +1,4 @@
 import {
-  Ingredient,
   Meal,
   MacroNutrients,
   MacroNutrientEnum,
