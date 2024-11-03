@@ -2,7 +2,7 @@ import axios from "axios";
 import { MEAL_PARSING_PROMPT } from "../gpt-prompts/meal-parsing";
 const AUTHORIZATION = `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`;
 import * as Crypto from "expo-crypto";
-import { Message, MessageFrom } from "@/components/Message";
+import { Message, MessageFrom } from "@/components/Log/Message";
 import { Meal } from "@/types/openAi.types";
 
 export const transcribeAudio = async (audioUri: string) => {
@@ -55,8 +55,6 @@ export const parseMeal = async (
     },
   ];
 
-  console.log(messages);
-
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
@@ -71,27 +69,21 @@ export const parseMeal = async (
         },
       }
     );
-    console.log("hello");
     const date = new Date();
     try {
-      console.log("unpased", response.data.choices[0].message.content);
       const meal = JSON.parse(response.data.choices[0].message.content) as Meal;
       if (meal.error) {
         throw new Error("Tried to record an invalid meal");
       }
-      console.log(meal);
       return {
         ...meal,
         mealId: Crypto.randomUUID(),
         date: `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`,
       };
     } catch (err) {
-      console.log(err);
-
       return { error: `${err}` };
     }
   } catch (err) {
-    console.log(err);
     return { error: `${err}` };
   }
 };

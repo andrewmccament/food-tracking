@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { ProgressBar } from "./ProgressBar";
-import { ThemedText } from "./ThemedText";
+import { ThemedText } from "../ThemedText";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
 import { removeMeal } from "@/state/foodSlice";

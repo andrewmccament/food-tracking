@@ -2,15 +2,15 @@ import {
   FoodDetailedResponse,
   FoodSearchV1Response,
 } from "@/types/fatSecret.types";
-import { ThemedText } from "./ThemedText";
+import { ThemedText } from "../ThemedText";
 import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import React from "react";
 import { Picker } from "@react-native-picker/picker";
 import { getFoodById } from "@/services/fatsecret";
 import { DisplayedMacroIterator, Serving } from "@/types/openAi.types";
-import { ProgressBar } from "./ProgressBar";
+import { ProgressBar } from "../Shared/ProgressBar";
 import { scaleServing } from "@/helpers/food-utils";
-import { ThemedButton } from "./ThemedButton";
+import { ThemedButton } from "../ThemedButton";
 import { ServingPicker } from "./ServingPicker";
 
 export type FoodSearchResultsProps = {

@@ -1,9 +1,9 @@
 import React from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import MealSummary from "@/components/MealSummary";
+import MealSummary from "@/components/Shared/MealSummary";
 import { useDispatch } from "react-redux";
 import { logMeal } from "@/state/foodSlice";
-import { Chat } from "@/components/Chat";
+import { Chat } from "@/components/Log/Chat";
 import { router } from "expo-router";
 
 export default function LoggingScreen() {

@@ -14,8 +14,26 @@ export const ServingPicker = ({
   onAmountChange,
   onServingIndexChange,
 }: ServingPickerProps) => {
+  let numericOptions: number[] = [];
+  for (let i = 0.05; i < 1000; i += 0.05) {
+    numericOptions.push(parseFloat(i.toFixed(2)));
+  }
+
+  const getInitialAmount = () => {
+    const amountToLookFor = parseFloat(possibleServings[0].number_of_units);
+    const existsAlready = numericOptions.findIndex(
+      (num) => num === amountToLookFor
+    );
+    if (existsAlready === -1) {
+      numericOptions.push(amountToLookFor);
+      numericOptions = numericOptions.sort((a, b) => a - b);
+    }
+    console.log(possibleServings[0], existsAlready);
+    return amountToLookFor;
+  };
+
   const [selectedUnitIndex, selectUnitIndex] = React.useState(0);
-  const [amount, setAmount] = React.useState(0);
+  const [amount, setAmount] = React.useState(getInitialAmount());
 
   React.useEffect(() => onAmountChange(amount), [amount]);
   React.useEffect(() => onServingIndexChange(selectedUnitIndex));
@@ -27,11 +45,6 @@ export const ServingPicker = ({
       );
     }
   }, [selectedUnitIndex]);
-
-  let numericOptions: number[] = [];
-  for (let i = 0.05; i < 1000; i += 0.05) {
-    numericOptions.push(parseFloat(i.toFixed(2)));
-  }
 
   return (
     <View style={styles.servingContainer}>

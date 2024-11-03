@@ -15,8 +15,8 @@ import { router } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
 import { getSummedMacros, sortMealsByCategory } from "@/helpers/food-utils";
-import MealSummary from "@/components/MealSummary";
-import { ProgressBar } from "@/components/ProgressBar";
+import MealSummary from "@/components/Shared/MealSummary";
+import { ProgressBar } from "@/components/Shared/ProgressBar";
 import { DisplayedMacroTypes, Meal } from "@/types/openAi.types";
 import { ThemedButton } from "@/components/ThemedButton";
 
