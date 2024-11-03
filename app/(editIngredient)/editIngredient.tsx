@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { ThemedText } from "@/components/ThemedText";
 import { capFirstLetter } from "@/helpers/ui";
 import { MacroBreakdown } from "@/components/MealSummary";
-import { searchFood } from "@/services/fatsecret";
+import { getFoodById, searchFood } from "@/services/fatsecret";
 import { updateIngredient } from "@/state/foodSlice";
 import { getPrettyNameForMacro } from "@/helpers/macronutrients";
 import { FoodSearchV1Response } from "@/types/fatSecret.types";
@@ -17,6 +17,7 @@ import {
   DisplayedMacroTypes,
   Ingredient,
 } from "@/types/openAi.types";
+import { convertFatSecretFood } from "@/helpers/food-utils";
 
 export default function EditIngredientScreen() {
   const dispatch = useDispatch();
@@ -52,6 +53,13 @@ export default function EditIngredientScreen() {
     }
   };
 
+  const fatSecretFoodSelected = async (foodId: string) => {
+    const detailedFood = await getFoodById(foodId);
+    if (detailedFood) {
+      updateThisIngredient(convertFatSecretFood(detailedFood));
+    }
+  };
+
   React.useEffect(() => {
     return () => {
       dispatch(
@@ -74,32 +82,36 @@ export default function EditIngredientScreen() {
       >
         {capFirstLetter(thisIngredient?.food_name)}
       </TextInput>
-      <MacroBreakdown macros={thisIngredient?.serving} />
-      <View style={styles.macroEditingList}>
-        {DisplayedMacroIterator.map((macro, index) => (
-          <View style={styles.macroEditor} key={index}>
-            <Text>
-              {
-                DisplayedMacroConfig.find(
-                  (macroConfig) => macroConfig.type === macro
-                )?.displayName
-              }
-            </Text>
-            <TextInput
-              onChangeText={(text) => updateMacro(macro, text)}
-              style={{ ...styles.searchBox, width: "auto" }}
-              keyboardType="numeric"
-            >
-              {thisIngredient?.serving[macro]}
-            </TextInput>
+      {!searchResults && (
+        <View>
+          <MacroBreakdown macros={thisIngredient?.serving} />
+          <View style={styles.macroEditingList}>
+            {DisplayedMacroIterator.map((macro, index) => (
+              <View style={styles.macroEditor} key={index}>
+                <Text>
+                  {
+                    DisplayedMacroConfig.find(
+                      (macroConfig) => macroConfig.type === macro
+                    )?.displayName
+                  }
+                </Text>
+                <TextInput
+                  onChangeText={(text) => updateMacro(macro, text)}
+                  style={{ ...styles.searchBox, width: "auto" }}
+                  keyboardType="numeric"
+                >
+                  {thisIngredient?.serving[macro]}
+                </TextInput>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </View>
+      )}
       {searchResults && (
         <ScrollView>
           <FoodSearchResults
             searchResults={searchResults}
-            onFoodSelected={() => {}}
+            onFoodSelected={(foodId) => fatSecretFoodSelected(foodId)}
           />
         </ScrollView>
       )}

@@ -4,6 +4,7 @@ import {
   DisplayedMacroTypes,
   Ingredient,
   Meal,
+  Serving,
 } from "@/types/openAi.types";
 
 export const getSummedMacros = (meals: Meal[]) => {
@@ -68,3 +69,40 @@ export const convertFatSecretFood = (
     },
   };
 };
+
+export const scaleServing = (serving: Serving, actualAmount: number) => {
+  if (!(serving && !Number.isNaN(actualAmount))) return null;
+  const baseAmount = parseInt(serving.number_of_units);
+  const divisor = baseAmount / actualAmount;
+  return {
+    ...serving,
+    serving_description: `${actualAmount.toFixed(2)} ${
+      serving.metric_serving_unit
+    }`,
+    metric_serving_amount: actualAmount.toFixed(3),
+    number_of_units: actualAmount.toFixed(3),
+    calories: divideString(serving.calories, divisor),
+    carbohydrate: divideString(serving.carbohydrate, divisor),
+    net_carbohydrates: divideString(
+      (parseFloat(serving.carbohydrate) - parseFloat(serving.fiber)).toString(),
+      divisor
+    ),
+    protein: divideString(serving.protein, divisor),
+    fat: divideString(serving.fat, divisor),
+    saturated_fat: divideString(serving.saturated_fat, divisor),
+    polyunsaturated_fat: divideString(serving.polyunsaturated_fat, divisor),
+    monounsaturated_fat: divideString(serving.monounsaturated_fat, divisor),
+    cholesterol: divideString(serving.cholesterol, divisor),
+    sodium: divideString(serving.sodium, divisor),
+    potassium: divideString(serving.potassium, divisor),
+    fiber: divideString(serving.fiber, divisor),
+    sugar: divideString(serving.sugar, divisor),
+    vitamin_a: divideString(serving.vitamin_a, divisor),
+    vitamin_c: divideString(serving.vitamin_c, divisor),
+    calcium: divideString(serving.calcium, divisor),
+    iron: divideString(serving.iron, divisor),
+  };
+};
+
+const divideString = (str: string, divisor: number) =>
+  (parseFloat(str) / divisor).toFixed(2);

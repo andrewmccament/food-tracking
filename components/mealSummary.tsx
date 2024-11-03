@@ -143,9 +143,7 @@ const styles = StyleSheet.create({
   },
   infoPanel: {
     backgroundColor: "#ffffff",
-
-    marginTop: 24,
-    borderRadius: 8,
+    borderRadius: 0,
     padding: 12,
   },
 });

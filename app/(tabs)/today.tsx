@@ -18,6 +18,7 @@ import { getSummedMacros, sortMealsByCategory } from "@/helpers/food-utils";
 import MealSummary from "@/components/MealSummary";
 import { ProgressBar } from "@/components/ProgressBar";
 import { DisplayedMacroTypes, Meal } from "@/types/openAi.types";
+import { ThemedButton } from "@/components/ThemedButton";
 
 export default function TodayScreen() {
   const date = new Date();
@@ -57,14 +58,10 @@ export default function TodayScreen() {
           ))}
         </View>
       </ScrollView>
-      <View style={styles.logButtonContainer}>
-        <View
-          style={styles.logButton}
-          onTouchEnd={() => router.push("../(log)/log")}
-        >
-          <Text style={styles.logButtonText}>Log</Text>
-        </View>
-      </View>
+      <ThemedButton
+        title="Log Food"
+        onPress={() => router.push("../(log)/log")}
+      />
     </View>
   );
 }
@@ -78,25 +75,7 @@ const styles = StyleSheet.create({
   todayListContainer: {
     flex: 1,
   },
-  logButtonContainer: {
-    height: 50,
-    marginBottom: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logButton: {
-    borderColor: "#22C2F1",
-    borderWidth: 1,
-    width: 150,
-    height: 60,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logButtonText: {
-    fontSize: 20,
-    color: "black",
-  },
+  logButtonContainer: {},
   todayList: {
     marginHorizontal: 24,
   },

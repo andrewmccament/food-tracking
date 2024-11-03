@@ -18,6 +18,7 @@ export type Meal = {
 };
 
 export type Serving = {
+  serving_id?: string;
   serving_description: string;
   metric_serving_amount: string;
   metric_serving_unit: string;
@@ -39,8 +40,8 @@ export type Serving = {
   vitamin_c: string;
   calcium: string;
   iron: string;
-  net_carbohydrates: string; // fatsecret does not give us this so we need to calculate it on the fly
-  confidence: number; // used by openai to provide a score from 0-10 representing its confidence in the accuracy of the nutritional data
+  net_carbohydrates?: string; // fatsecret does not give us this so we need to calculate it on the fly
+  confidence?: number; // used by openai to provide a score from 0-10 representing its confidence in the accuracy of the nutritional data
 };
 
 export enum DisplayedMacroTypes {

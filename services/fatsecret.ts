@@ -56,8 +56,6 @@ export const searchFood = async (
       }
     );
 
-    console.log(JSON.stringify(response.data));
-    console.log(await getFoodById(response.data.foods.food[0].food_id));
     return response.data;
   } catch (error) {
     console.error("Error fetching food data:", error);
@@ -84,7 +82,6 @@ export const getFoodById = async (
       }
     );
 
-    console.log(JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     console.error("Error fetching food data:", error);

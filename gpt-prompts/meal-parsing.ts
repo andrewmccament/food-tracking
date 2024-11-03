@@ -80,5 +80,5 @@ followUpQuestion: "How many carrots did you consume and how were they cooked"
 } for example.
 3. Always return ingredients in standard units of measurement, even if conversions are needed.
 4. Do your very best to avoid any null values.
-5. Only return JSON that is ready to JSON.parse() - no tags.
+5. Only return JSON that is ready to JSON.parse() - no tags.  Ensure property names are quoted.
 `;

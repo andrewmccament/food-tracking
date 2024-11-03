@@ -13,6 +13,7 @@ import { recordMeal } from "@/state/foodSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { Message } from "./Message";
 import { Meal } from "@/types/openAi.types";
+import { ButtonStyle, ThemedButton } from "./ThemedButton";
 
 export type ChatProps = {
   onMealRetrieval: (mealId: string) => void;
@@ -33,13 +34,13 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
   const [listening, setListening] = React.useState(false);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const recording = React.useRef({} as Audio.Recording);
-  const [transcription, setTranscription] = React.useState();
+  const [transcription, setTranscription] = React.useState<string>();
   const [meal, setMeal] = React.useState<Meal>();
   const dispatch = useDispatch();
 
   // start logging automatically when the chat component first mounts (after waiting a second)
   React.useEffect(() => {
-    setTimeout(() => startLogging(), 1000);
+    //setTimeout(() => startLogging(), 1000);
 
     return () => {
       if (recording.current) {
@@ -88,48 +89,61 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
       const uri = recording.current.getURI();
       if (uri) {
         const transcription = await transcribeAudio(uri);
-
-        if (transcription) {
-          setTranscription(transcription);
-          setMessages((previous) => {
-            return previous
-              .slice(0, -1)
-              .concat({ from: MessageFrom.USER, contents: transcription })
-              .concat({ from: MessageFrom.GPT, contents: "..." });
-          });
-          const response = await parseMeal(transcription);
-          console.log(response);
-          if (!response?.error) {
-            if (response.mealId) {
-              dispatch(recordMeal(response));
-
-              setMeal(response);
-              onMealRetrieval(response.mealId);
-              setMessages((previous) =>
-                previous.slice(0, -1).concat({
-                  from: MessageFrom.GPT,
-                  contents: response.motivation,
-                })
-              );
-            } else {
-              setMessages((previous) =>
-                previous.slice(0, -1).concat({
-                  from: MessageFrom.GPT,
-                  contents: response.followUpQuestion as string,
-                })
-              );
-            }
-          } else {
-            setMessages((previous) =>
-              previous.slice(0, -1).concat({
-                from: MessageFrom.GPT,
-                contents: `I'm sorry, I didn't quite get that.  Can you try again please?`,
-              })
-            );
-          }
-        }
+        attemptParseMeal(transcription);
       } else {
         console.error("NULL URI");
+      }
+    }
+  };
+
+  const attemptParseMeal = async (
+    transcription: string,
+    voiceOrigin = true
+  ) => {
+    if (transcription) {
+      setTranscription(transcription);
+      if (voiceOrigin) {
+        setMessages((previous) => {
+          return previous
+            .slice(0, -1)
+            .concat({ from: MessageFrom.USER, contents: transcription })
+            .concat({ from: MessageFrom.GPT, contents: "..." });
+        });
+      } else {
+        setMessages((previous) => {
+          return previous
+            .concat({ from: MessageFrom.USER, contents: transcription })
+            .concat({ from: MessageFrom.GPT, contents: "..." });
+        });
+      }
+      const response = await parseMeal(transcription);
+      if (!response?.error) {
+        if (response.mealId) {
+          dispatch(recordMeal(response));
+
+          setMeal(response);
+          onMealRetrieval(response.mealId);
+          setMessages((previous) =>
+            previous.slice(0, -1).concat({
+              from: MessageFrom.GPT,
+              contents: response.motivation,
+            })
+          );
+        } else {
+          setMessages((previous) =>
+            previous.slice(0, -1).concat({
+              from: MessageFrom.GPT,
+              contents: response.followUpQuestion as string,
+            })
+          );
+        }
+      } else {
+        setMessages((previous) =>
+          previous.slice(0, -1).concat({
+            from: MessageFrom.GPT,
+            contents: `I'm sorry, I didn't quite get that.  Can you try again please?`,
+          })
+        );
       }
     }
   };
@@ -140,22 +154,25 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
           <Message from={message.from} content={message.contents} key={index} />
         ))}
       </ScrollView>
-      <TextInput />
-      {listening ? (
-        <Button
-          title="Stop Logging"
-          onPress={() => {
-            stopLogging();
+      <View style={styles.chatRow}>
+        <TextInput
+          style={styles.input}
+          placeholder="Type to AI..."
+          returnKeyType="send"
+          onSubmitEditing={(event) => {
+            attemptParseMeal(event.nativeEvent.text);
           }}
         />
-      ) : (
-        <Button
-          title="Log"
-          onPress={() => {
-            startLogging();
-          }}
-        />
-      )}
+        <View style={styles.speakButton}>
+          <ThemedButton
+            title={listening ? "Stop" : "Speak"}
+            style={ButtonStyle.DARK}
+            onPress={() => {
+              listening ? stopLogging() : startLogging();
+            }}
+          />
+        </View>
+      </View>
     </View>
   );
 };
@@ -165,13 +182,29 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "black",
-    borderRadius: 8,
     padding: 8,
+    paddingBottom: 0,
   },
   text: {
     color: "white",
   },
   messages: {
     flexDirection: "column-reverse",
+  },
+  chatRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderColor: "#316A7D",
+    borderWidth: 1,
+    height: 44,
+    color: "white",
+  },
+  speakButton: {
+    width: 90,
   },
 });

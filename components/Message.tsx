@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   message: {
     width: "60%",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 12,
   },
   userMessage: {

@@ -22,7 +22,6 @@ export default function LoggingScreen() {
 
   React.useEffect(() => {
     return () => {
-      console.log("unmount", userAddedMeal, mealId.current);
       if (mealId.current && userAddedMeal.current == false) {
         Alert.alert("Did you want to save the meal or discard?", "", [
           {
@@ -39,6 +38,12 @@ export default function LoggingScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
+        <Chat
+          onMealRetrieval={(thisMealId) => {
+            mealId.current = thisMealId;
+            setMealIdChanged(thisMealId);
+          }}
+        />
         {mealId.current ? (
           <MealSummary
             mealId={mealId.current}
@@ -51,12 +56,16 @@ export default function LoggingScreen() {
         )}
       </View>
       <View style={styles.bottomSection}>
-        <Chat
-          onMealRetrieval={(thisMealId) => {
-            mealId.current = thisMealId;
-            setMealIdChanged(thisMealId);
-          }}
-        />
+        {mealId.current ? (
+          <MealSummary
+            mealId={mealId.current}
+            allowAdding
+            onAdd={() => addMeal()}
+            expandedByDefault
+          />
+        ) : (
+          <></>
+        )}
       </View>
     </View>
   );
@@ -68,15 +77,14 @@ const styles = StyleSheet.create({
     flex: 1,
     height: "100%",
     justifyContent: "space-between",
-    marginBottom: 24,
+    backgroundColor: "#D5E1E1",
   },
   topSection: {
-    padding: 8,
-    height: "45%",
+    padding: 0,
+    height: "40%",
   },
   bottomSection: {
-    height: "45%",
-    padding: 8,
+    flex: 1,
     justifyContent: "flex-start",
   },
 });
