@@ -11,22 +11,12 @@ import { Audio } from "expo-av";
 import { parseMeal, transcribeAudio } from "@/services/open-ai";
 import { recordMeal } from "@/state/foodSlice";
 import { useSelector, useDispatch } from "react-redux";
-import { Message } from "./Message";
+import { Message, MessageFrom } from "./Message";
 import { Meal } from "@/types/openAi.types";
 import { ButtonStyle, ThemedButton } from "./ThemedButton";
 
 export type ChatProps = {
   onMealRetrieval: (mealId: string) => void;
-};
-
-export enum MessageFrom {
-  USER = "Andrew",
-  GPT = "Nourishly",
-}
-
-export type Message = {
-  from: MessageFrom;
-  contents: string;
 };
 
 export const Chat = ({ onMealRetrieval }: ChatProps) => {

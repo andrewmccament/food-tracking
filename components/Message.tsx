@@ -1,9 +1,18 @@
 import React from "react";
-import { MessageFrom } from "./Chat";
 import { View, Text, StyleSheet } from "react-native";
 export type MessageProps = {
   from: MessageFrom;
   content: string;
+};
+
+export enum MessageFrom {
+  USER = "Andrew",
+  GPT = "Nourishly",
+}
+
+export type Message = {
+  from: MessageFrom;
+  contents: string;
 };
 
 export const Message = ({ from, content }: MessageProps) => {

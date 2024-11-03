@@ -1,8 +1,9 @@
 import axios from "axios";
-import { Meal, MEAL_PARSING_PROMPT } from "../gpt-prompts/meal-parsing";
+import { MEAL_PARSING_PROMPT } from "../gpt-prompts/meal-parsing";
 const AUTHORIZATION = `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`;
 import * as Crypto from "expo-crypto";
-import { Message, MessageFrom } from "@/components/Chat";
+import { Message, MessageFrom } from "@/components/Message";
+import { Meal } from "@/types/openAi.types";
 
 export const transcribeAudio = async (audioUri: string) => {
   const formData = new FormData();

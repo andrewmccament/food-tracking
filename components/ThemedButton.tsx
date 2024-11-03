@@ -15,7 +15,7 @@ export enum ButtonStyle {
 export type ThemedButtonProps = {
   title: string;
   onPress: () => void;
-  style: ButtonStyle;
+  style?: ButtonStyle;
 };
 
 export const ThemedButton = ({ title, onPress, style }: ThemedButtonProps) => {

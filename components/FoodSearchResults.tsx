@@ -11,6 +11,7 @@ import { DisplayedMacroIterator, Serving } from "@/types/openAi.types";
 import { ProgressBar } from "./ProgressBar";
 import { scaleServing } from "@/helpers/food-utils";
 import { ThemedButton } from "./ThemedButton";
+import { ServingPicker } from "./ServingPicker";
 
 export type FoodSearchResultsProps = {
   searchResults: FoodSearchV1Response;
@@ -37,26 +38,12 @@ export const FoodSearchResults = ({
       calculateServingPreview();
     }
   };
-  let numericOptions: number[] = [];
-  for (let i = 0.05; i < 1000; i += 0.05) {
-    numericOptions.push(parseFloat(i.toFixed(2)));
-  }
 
   React.useEffect(() => {
     if (expandedFoodDetails) {
-      setAmount(
-        parseFloat(
-          expandedFoodDetails.food.servings.serving[selectedUnitIndex]
-            .number_of_units
-        )
-      );
       calculateServingPreview();
     }
-  }, [selectedUnitIndex]);
-
-  React.useEffect(() => {
-    calculateServingPreview();
-  }, [amount]);
+  }, [selectedUnitIndex, amount]);
 
   const calculateServingPreview = () => {
     const serving =
@@ -76,37 +63,15 @@ export const FoodSearchResults = ({
               <ThemedText type="default">{food.food_description}</ThemedText>
             )}
           </TouchableOpacity>
-          {index === expandedIndex && (
+          {index === expandedIndex && expandedFoodDetails && (
             <View>
-              <View style={styles.servingContainer}>
-                <Picker
-                  selectedValue={amount}
-                  style={styles.servingTypePicker}
-                  onValueChange={(itemValue: number) => {
-                    setAmount(itemValue);
-                  }}
-                >
-                  {numericOptions.map((option) => (
-                    <Picker.Item label={option.toString()} value={option} />
-                  ))}
-                </Picker>
-                <Picker
-                  style={styles.servingTypePicker}
-                  selectedValue={selectedUnitIndex}
-                  onValueChange={(itemValue: number) => {
-                    selectUnitIndex(itemValue);
-                  }}
-                >
-                  {expandedFoodDetails?.food.servings.serving.map(
-                    (serving, index) => (
-                      <Picker.Item
-                        label={serving.measurement_description}
-                        value={index}
-                      />
-                    )
-                  )}
-                </Picker>
-              </View>
+              <ServingPicker
+                possibleServings={expandedFoodDetails?.food.servings.serving}
+                onAmountChange={(amount: number) => setAmount(amount)}
+                onServingIndexChange={(newIndex: number) =>
+                  selectUnitIndex(newIndex)
+                }
+              />
               <View>
                 {servingPreview &&
                   DisplayedMacroIterator.map((macro) => (
@@ -131,12 +96,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     width: "100%",
     minHeight: 100,
-  },
-  servingContainer: {
-    flexDirection: "row",
-    width: "100%",
-  },
-  servingTypePicker: {
-    width: "50%",
   },
 });
