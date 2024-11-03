@@ -1,7 +1,7 @@
 import React from "react";
 import { RootState } from "@/state/store";
 import { useLocalSearchParams } from "expo-router";
-import { Text, View, StyleSheet, TextInput } from "react-native";
+import { Text, View, StyleSheet, TextInput, ScrollView } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { ThemedText } from "@/components/ThemedText";
 import { capFirstLetter } from "@/helpers/ui";
@@ -10,6 +10,8 @@ import { searchFood } from "@/services/fatsecret";
 import { updateIngredient } from "@/state/foodSlice";
 import { getPrettyNameForMacro } from "@/helpers/macronutrients";
 import { MacroNutrientEnum } from "@/gpt-prompts/meal-parsing";
+import { FoodSearchV1Response } from "@/types/fatSecret.types";
+import { FoodSearchResults } from "@/components/FoodSearchResults";
 
 export default function EditIngredientScreen() {
   const dispatch = useDispatch();
@@ -19,6 +21,8 @@ export default function EditIngredientScreen() {
   const meal = useSelector((state: RootState) => state.food.todaysMeals).find(
     (meal) => meal.mealId === mealId
   );
+  const [searchResults, setSearchResults] =
+    React.useState<FoodSearchV1Response>();
   const [thisIngredient, updateThisIngredient] = React.useState(
     meal?.ingredients[ingredientIndex]
   );
@@ -36,6 +40,13 @@ export default function EditIngredientScreen() {
     updateThisIngredient(thisIngredientCopy);
   };
 
+  const search = async (query: string) => {
+    const results = await searchFood(query);
+    if (results) {
+      setSearchResults(results);
+    }
+  };
+
   React.useEffect(() => {
     return () => {
       dispatch(
@@ -51,7 +62,7 @@ export default function EditIngredientScreen() {
   return (
     <View style={styles.container}>
       <TextInput
-        onSubmitEditing={(event) => searchFood(event.nativeEvent.text)}
+        onSubmitEditing={(event) => search(event.nativeEvent.text)}
         style={styles.searchBox}
         onChangeText={editIngredientName}
         clearButtonMode={"always"}
@@ -73,6 +84,11 @@ export default function EditIngredientScreen() {
           </View>
         ))}
       </View>
+      {searchResults && (
+        <ScrollView>
+          <FoodSearchResults searchResults={searchResults} />
+        </ScrollView>
+      )}
     </View>
   );
 }

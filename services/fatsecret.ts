@@ -1,3 +1,7 @@
+import {
+  FoodDetailedResponse,
+  FoodSearchV1Response,
+} from "@/types/fatSecret.types";
 import axios from "axios";
 
 const FATSECRET_CLIENT_ID = process.env.EXPO_PUBLIC_FATSECRET_CLIENT_ID;
@@ -33,7 +37,9 @@ const getAccessToken = async (): Promise<string> => {
   }
 };
 
-export const searchFood = async (searchExpression: string) => {
+export const searchFood = async (
+  searchExpression: string
+): Promise<FoodSearchV1Response | null> => {
   try {
     const token = await getAccessToken();
     if (!token) return null;
@@ -59,7 +65,9 @@ export const searchFood = async (searchExpression: string) => {
   }
 };
 
-export const getFoodById = async (foodId: string) => {
+export const getFoodById = async (
+  foodId: string
+): Promise<FoodDetailedResponse | null> => {
   try {
     const token = await getAccessToken();
     if (!token) return null;

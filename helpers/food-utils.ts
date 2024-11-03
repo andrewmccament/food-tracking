@@ -1,4 +1,5 @@
-import { MacroNutrients, Meal } from "@/gpt-prompts/meal-parsing";
+import { Ingredient, MacroNutrients, Meal } from "@/gpt-prompts/meal-parsing";
+import { FoodDetailedResponse } from "@/types/fatSecret.types";
 
 export const getSummedMacros = (meals: Meal[]) => {
   let totals: MacroNutrients = {
@@ -41,4 +42,15 @@ export const sortMealsByCategory = (meals: Meal[]) => {
       mealRanking.findIndex((str) => str === meal2.meal.toLowerCase())
     );
   });
+};
+
+export const convertFatSecretFood = (
+  food: FoodDetailedResponse
+): Ingredient => {
+  return {
+    ingredientName: food.food.food_name,
+    unitName: food.food.servings.serving[0].measurement_description,
+    amount: parseInt(food.food.servings.serving[0].number_of_units),
+    macronutrients: food.food.servings.serving[0],
+  };
 };
