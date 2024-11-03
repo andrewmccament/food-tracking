@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { Ingredient, Meal } from "@/gpt-prompts/meal-parsing";
+import { Ingredient, Meal } from "@/types/openAi.types";
 
 export interface foodState {
   todaysMeals: Meal[];
@@ -44,14 +44,33 @@ export const foodSlice = createSlice({
       );
       const meal = state.todaysMeals[mealIndex];
       meal.ingredients.push({
-        ingredientName: "New Ingredient",
-        macronutrients: {
-          calories: 0,
-          carbs: 0,
-          netCarbs: 0,
-          fiber: 0,
-          fat: 0,
-          protein: 0,
+        food_name: "New Ingredient",
+        food_type: "",
+        food_url: "",
+        serving: {
+          serving_description: "1 tbsp",
+          metric_serving_amount: "14.900",
+          metric_serving_unit: "g",
+          number_of_units: "1.000",
+          measurement_description: "tbsp",
+          calories: "0",
+          carbohydrate: "0",
+          net_carbohydrates: "0",
+          protein: "0",
+          fat: "0",
+          saturated_fat: "0",
+          polyunsaturated_fat: "0",
+          monounsaturated_fat: "0",
+          cholesterol: "0",
+          sodium: "0",
+          potassium: "0",
+          fiber: "0",
+          sugar: "0",
+          vitamin_a: "0",
+          vitamin_c: "0",
+          calcium: "0",
+          iron: "0",
+          confidence: 10,
         },
       });
       state.todaysMeals[mealIndex] = meal;

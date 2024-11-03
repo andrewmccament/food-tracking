@@ -4,6 +4,7 @@ export type Meal = {
   followUpQuestion?: string;
   date: string;
   meal:
+    | "Early morning snack"
     | "Breakfast"
     | "Snack before lunch"
     | "Uncategorized"
@@ -14,32 +15,122 @@ export type Meal = {
   summary: string;
   motivation: string;
   ingredients: Ingredient[];
-  recipes: Recipe[];
 };
 
-export type MacroNutrients = {
-  calories: number;
-  carbs: number;
-  fiber: number;
-  netCarbs: number;
-  protein: number;
-  fat: number;
+export type Serving = {
+  serving_description: string;
+  metric_serving_amount: string;
+  metric_serving_unit: string;
+  number_of_units: string;
+  measurement_description: string;
+  calories: string;
+  carbohydrate: string;
+  protein: string;
+  fat: string;
+  saturated_fat: string;
+  polyunsaturated_fat: string;
+  monounsaturated_fat: string;
+  cholesterol: string;
+  sodium: string;
+  potassium: string;
+  fiber: string;
+  sugar: string;
+  vitamin_a: string;
+  vitamin_c: string;
+  calcium: string;
+  iron: string;
+  net_carbohydrates: string; // fatsecret does not give us this so we need to calculate it on the fly
+  confidence: number; // used by openai to provide a score from 0-10 representing its confidence in the accuracy of the nutritional data
 };
 
-export enum MacroNutrientEnum {
+export enum DisplayedMacroTypes {
   calories = "calories",
-  carbs = "carbs",
+  carbohydrate = "carbohydrate",
   fiber = "fiber",
-  netCarbs = "netCarbs",
+  net_carbohydrates = "net_carbohydrates",
   protein = "protein",
   fat = "fat",
+  sugar = "sugar",
 }
 
+export const DisplayedMacroConfig = [
+  {
+    type: DisplayedMacroTypes.calories,
+    color: "#FF816E",
+    displayName: "Calories",
+    unit: " Calories",
+    shortUnit: " Cal",
+    primary: true,
+  },
+  {
+    type: DisplayedMacroTypes.carbohydrate,
+    color: "#FFCB6E",
+    displayName: "Carbs",
+    unit: " grams",
+    shortUnit: "g",
+    primary: false,
+  },
+  {
+    type: DisplayedMacroTypes.net_carbohydrates,
+    color: "#FFF86E",
+    displayName: "Net Carbs",
+    unit: " grams",
+    shortUnit: "g",
+    primary: true,
+  },
+  {
+    type: DisplayedMacroTypes.fat,
+    color: "#90FF6E",
+    displayName: "Fat",
+    unit: " grams",
+    shortUnit: "g",
+    primary: true,
+  },
+  {
+    type: DisplayedMacroTypes.protein,
+    color: "#69CEDF",
+    displayName: "Protein",
+    unit: " grams",
+    shortUnit: "g",
+    primary: true,
+  },
+  {
+    type: DisplayedMacroTypes.fiber,
+    color: "#6986DF",
+    displayName: "Fiber",
+    unit: " grams",
+    shortUnit: "g",
+    primary: false,
+  },
+  {
+    type: DisplayedMacroTypes.sugar,
+    color: "#FF6ED8",
+    displayName: "Sugar",
+    unit: " grams",
+    shortUnit: "g",
+    primary: false,
+  },
+];
+
+export const DisplayedMacroIterator = DisplayedMacroConfig.map((displayed) => {
+  return displayed.type;
+});
+
+export type DisplayedMacros = {
+  calories: number;
+  carbohydrate: number;
+  fiber: number;
+  net_carbohydrates: number;
+  protein: number;
+  fat: number;
+  sugar: number;
+};
+
 export type Ingredient = {
-  ingredientName: string;
-  unitName?: string;
-  amount?: number;
-  macronutrients: MacroNutrients;
+  food_name: string;
+  food_type: string;
+  food_url: string;
+  serving: Serving;
 };
 
 export type Recipe = {

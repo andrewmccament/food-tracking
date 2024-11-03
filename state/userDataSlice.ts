@@ -1,19 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { MacroNutrients, Meal } from "@/gpt-prompts/meal-parsing";
+import { Serving, Meal } from "@/gpt-prompts/meal-parsing";
 
 export interface userDataState {
-  goals: MacroNutrients;
+  goals: Serving;
 }
 
 const initialState: userDataState = {
   goals: {
     calories: 1800,
-    carbs: 30,
+    carbohydrate: 30,
     fiber: 20,
-    netCarbs: 20,
+    net_carbohydrates: 20,
     protein: 160,
     fat: 150,
+    sugar: 10,
   },
 };
 

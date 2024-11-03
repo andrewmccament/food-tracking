@@ -1,12 +1,8 @@
 import React from "react";
-import { Text, View, StyleSheet, Button, Alert } from "react-native";
-import { Audio } from "expo-av";
-import { parseMeal, transcribeAudio } from "@/services/open-ai";
+import { View, StyleSheet, Alert } from "react-native";
 import MealSummary from "@/components/MealSummary";
-import { Meal } from "@/gpt-prompts/meal-parsing";
-import { RootState } from "@/state/store";
-import { useSelector, useDispatch } from "react-redux";
-import { logMeal, recordMeal } from "@/state/foodSlice";
+import { useDispatch } from "react-redux";
+import { logMeal } from "@/state/foodSlice";
 import { Chat } from "@/components/Chat";
 import { router } from "expo-router";
 

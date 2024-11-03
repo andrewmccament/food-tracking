@@ -1,14 +1,20 @@
-import { Ingredient, MacroNutrients, Meal } from "@/gpt-prompts/meal-parsing";
 import { FoodDetailedResponse } from "@/types/fatSecret.types";
+import {
+  DisplayedMacros,
+  DisplayedMacroTypes,
+  Ingredient,
+  Meal,
+} from "@/types/openAi.types";
 
 export const getSummedMacros = (meals: Meal[]) => {
-  let totals: MacroNutrients = {
+  let totals: DisplayedMacros = {
     calories: 0,
-    carbs: 0,
+    carbohydrate: 0,
     fiber: 0,
-    netCarbs: 0,
+    net_carbohydrates: 0,
     protein: 0,
     fat: 0,
+    sugar: 0,
   };
 
   const keys = Object.keys(totals);
@@ -16,7 +22,7 @@ export const getSummedMacros = (meals: Meal[]) => {
   for (let key of keys) {
     for (let meal of meals) {
       for (let ingredient of meal.ingredients) {
-        totals[key] += ingredient.macronutrients[key];
+        totals[key] += parseInt(ingredient.serving[key]);
       }
     }
   }
@@ -29,6 +35,7 @@ export const getSummedMacros = (meals: Meal[]) => {
 export const sortMealsByCategory = (meals: Meal[]) => {
   const mealRanking: string[] = [
     "uncategorized",
+    "early morning snack",
     "breakfast",
     "snack before lunch",
     "lunch",
@@ -48,9 +55,16 @@ export const convertFatSecretFood = (
   food: FoodDetailedResponse
 ): Ingredient => {
   return {
-    ingredientName: food.food.food_name,
-    unitName: food.food.servings.serving[0].measurement_description,
-    amount: parseInt(food.food.servings.serving[0].number_of_units),
-    macronutrients: food.food.servings.serving[0],
+    food_name: food.food.food_name,
+    food_type: food.food.food_type,
+    food_url: food.food.food_url,
+    serving: {
+      ...food.food.servings.serving[0],
+      confidence: 10,
+      net_carbohydrates: (
+        parseInt(food.food.servings.serving[0].carbohydrate) -
+        parseInt(food.food.servings.serving[0].fiber)
+      ).toString(),
+    },
   };
 };

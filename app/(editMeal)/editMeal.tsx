@@ -1,4 +1,3 @@
-import { EditableIngredient } from "@/components/EditableIngredient";
 import { ThemedText } from "@/components/ThemedText";
 import { capFirstLetter } from "@/helpers/ui";
 import { addIngredient, removeIngredient } from "@/state/foodSlice";
@@ -46,9 +45,7 @@ export default function EditMealScreen() {
                 })
               }
             >
-              <ThemedText>
-                {capFirstLetter(ingredient.ingredientName)}
-              </ThemedText>
+              <ThemedText>{capFirstLetter(ingredient.food_name)}</ThemedText>
             </View>
             <View
               style={styles.delete}

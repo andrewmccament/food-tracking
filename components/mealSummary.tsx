@@ -1,10 +1,4 @@
-import {
-  Meal,
-  MacroNutrients,
-  MacroNutrientEnum,
-} from "@/gpt-prompts/meal-parsing";
 import { getSummedMacros } from "@/helpers/food-utils";
-import { getPrettyUnitsForMacro } from "@/helpers/macronutrients";
 import { capFirstLetter } from "@/helpers/ui";
 import { router } from "expo-router";
 import React from "react";
@@ -21,19 +15,27 @@ import { ThemedText } from "./ThemedText";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
 import { removeMeal } from "@/state/foodSlice";
+import {
+  DisplayedMacroConfig,
+  DisplayedMacroIterator,
+  DisplayedMacroTypes,
+  Ingredient,
+  Meal,
+  Serving,
+} from "@/types/openAi.types";
 
 export type MealSummaryProps = {
   mealId: string;
   allowAdding?: boolean;
-  onAdd?: () => void;
+  onAdd: () => void;
   expandedByDefault?: boolean;
 };
 
-export type MacroBreakdownProps = { macros: MacroNutrients };
+export type MacroBreakdownProps = { macros: Serving };
 export const MacroBreakdown = ({ macros }: MacroBreakdownProps) => {
   return (
     <View>
-      {Object.keys(macros).map((macro, index) => (
+      {DisplayedMacroIterator.map((macro, index) => (
         <View key={index}>
           <ProgressBar macro={macro} amount={macros[macro]} />
         </View>
@@ -74,9 +76,11 @@ export default function MealSummary({
           {capFirstLetter(meal.meal)}
           <ThemedText type="defaultSemiBold">{` (${
             getSummedMacros([meal]).calories
-          }${getPrettyUnitsForMacro(
-            MacroNutrientEnum.calories
-          )}) `}</ThemedText>
+          }${
+            DisplayedMacroConfig.find(
+              (macroConfig) => macroConfig.type === DisplayedMacroTypes.calories
+            )?.unit
+          })`}</ThemedText>
         </ThemedText>
         <View style={styles.row}>
           {meal.isAdded && <Button title="Delete" onPress={deleteMeal} />}
@@ -95,17 +99,17 @@ export default function MealSummary({
       <ThemedText>{meal.summary}</ThemedText>
       {expanded && (
         <ScrollView style={styles.ingredientList}>
-          {meal.ingredients.map((ingredient, index) => (
+          {meal.ingredients.map((ingredient: Ingredient, index: number) => (
             <View style={styles.ingredient} key={index}>
               <View style={styles.row}>
                 <ThemedText type="defaultSemiBold">
-                  {capFirstLetter(ingredient.ingredientName)}
+                  {capFirstLetter(ingredient.food_name)}
                 </ThemedText>
                 <ThemedText type="default">
-                  {` ${ingredient.amount ?? ""} ${ingredient.unitName ?? ""}`}
+                  {` ${ingredient.serving.serving_description}`}
                 </ThemedText>
               </View>
-              <MacroBreakdown macros={ingredient.macronutrients} />
+              <MacroBreakdown macros={ingredient.serving} />
             </View>
           ))}
         </ScrollView>

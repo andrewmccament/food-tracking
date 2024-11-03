@@ -9,10 +9,10 @@ import {
 } from "react-native";
 import { Audio } from "expo-av";
 import { parseMeal, transcribeAudio } from "@/services/open-ai";
-import { Meal } from "@/gpt-prompts/meal-parsing";
 import { recordMeal } from "@/state/foodSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { Message } from "./Message";
+import { Meal } from "@/types/openAi.types";
 
 export type ChatProps = {
   onMealRetrieval: (mealId: string) => void;

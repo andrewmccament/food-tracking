@@ -9,9 +9,14 @@ import { MacroBreakdown } from "@/components/MealSummary";
 import { searchFood } from "@/services/fatsecret";
 import { updateIngredient } from "@/state/foodSlice";
 import { getPrettyNameForMacro } from "@/helpers/macronutrients";
-import { MacroNutrientEnum } from "@/gpt-prompts/meal-parsing";
 import { FoodSearchV1Response } from "@/types/fatSecret.types";
 import { FoodSearchResults } from "@/components/FoodSearchResults";
+import {
+  DisplayedMacroConfig,
+  DisplayedMacroIterator,
+  DisplayedMacroTypes,
+  Ingredient,
+} from "@/types/openAi.types";
 
 export default function EditIngredientScreen() {
   const dispatch = useDispatch();
@@ -23,16 +28,16 @@ export default function EditIngredientScreen() {
   );
   const [searchResults, setSearchResults] =
     React.useState<FoodSearchV1Response>();
-  const [thisIngredient, updateThisIngredient] = React.useState(
+  const [thisIngredient, updateThisIngredient] = React.useState<Ingredient>(
     meal?.ingredients[ingredientIndex]
   );
 
   const editIngredientName = (text: string) => {
-    const updatedIngredient = { ...thisIngredient, ingredientName: text };
+    const updatedIngredient = { ...thisIngredient, food_name: text };
     updateThisIngredient(updatedIngredient);
   };
 
-  const updateMacro = (macro: MacroNutrientEnum, value: string) => {
+  const updateMacro = (macro: DisplayedMacroTypes, value: string) => {
     if (isNaN(parseInt(value))) return;
 
     let thisIngredientCopy = JSON.parse(JSON.stringify(thisIngredient));
@@ -67,26 +72,35 @@ export default function EditIngredientScreen() {
         onChangeText={editIngredientName}
         clearButtonMode={"always"}
       >
-        {capFirstLetter(thisIngredient?.ingredientName)}
+        {capFirstLetter(thisIngredient?.food_name)}
       </TextInput>
-      <MacroBreakdown macros={thisIngredient?.macronutrients} />
+      <MacroBreakdown macros={thisIngredient?.serving} />
       <View style={styles.macroEditingList}>
-        {Object.keys(thisIngredient?.macronutrients).map((macro, index) => (
+        {DisplayedMacroIterator.map((macro, index) => (
           <View style={styles.macroEditor} key={index}>
-            <Text>{getPrettyNameForMacro(macro)}</Text>
+            <Text>
+              {
+                DisplayedMacroConfig.find(
+                  (macroConfig) => macroConfig.type === macro
+                )?.displayName
+              }
+            </Text>
             <TextInput
               onChangeText={(text) => updateMacro(macro, text)}
               style={{ ...styles.searchBox, width: "auto" }}
               keyboardType="numeric"
             >
-              {thisIngredient?.macronutrients[macro]}
+              {thisIngredient?.serving[macro]}
             </TextInput>
           </View>
         ))}
       </View>
       {searchResults && (
         <ScrollView>
-          <FoodSearchResults searchResults={searchResults} />
+          <FoodSearchResults
+            searchResults={searchResults}
+            onFoodSelected={() => {}}
+          />
         </ScrollView>
       )}
     </View>

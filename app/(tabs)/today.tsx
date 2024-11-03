@@ -15,9 +15,9 @@ import { router } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
 import { getSummedMacros, sortMealsByCategory } from "@/helpers/food-utils";
-import { MacroNutrientEnum, Meal } from "@/gpt-prompts/meal-parsing";
 import MealSummary from "@/components/MealSummary";
 import { ProgressBar } from "@/components/ProgressBar";
+import { DisplayedMacroTypes, Meal } from "@/types/openAi.types";
 
 export default function TodayScreen() {
   const date = new Date();
@@ -36,24 +36,24 @@ export default function TodayScreen() {
         <View style={styles.todayListContainer}>
           <ThemedView style={styles.infoPanel}>
             <ProgressBar
-              macro={MacroNutrientEnum.calories}
+              macro={DisplayedMacroTypes.calories}
               amount={todayMacros.calories}
             />
             <ProgressBar
-              macro={MacroNutrientEnum.netCarbs}
-              amount={todayMacros.netCarbs}
+              macro={DisplayedMacroTypes.net_carbohydrates}
+              amount={todayMacros.net_carbohydrates}
             />
             <ProgressBar
-              macro={MacroNutrientEnum.fat}
+              macro={DisplayedMacroTypes.fat}
               amount={todayMacros.fat}
             />
             <ProgressBar
-              macro={MacroNutrientEnum.protein}
+              macro={DisplayedMacroTypes.protein}
               amount={todayMacros.protein}
             />
           </ThemedView>
           {todaysMeals.map((meal: Meal, index) => (
-            <MealSummary mealId={meal.mealId} key={index}/>
+            <MealSummary mealId={meal.mealId} key={index} />
           ))}
         </View>
       </ScrollView>

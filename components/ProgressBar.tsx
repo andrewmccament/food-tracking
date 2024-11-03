@@ -1,23 +1,24 @@
-import { MacroNutrientEnum, MacroNutrients } from "@/gpt-prompts/meal-parsing";
 import { RootState } from "@/state/store";
 import { useSelector, useDispatch } from "react-redux";
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import {
-  getColorForMacro,
-  getPrettyNameForMacro,
-  getPrettyUnitsForMacro,
-} from "@/helpers/macronutrients";
+  DisplayedMacroConfig,
+  DisplayedMacroTypes,
+} from "@/types/openAi.types";
 
-type ProgressBarProps = {
-  macro: MacroNutrientEnum;
+export type ProgressBarProps = {
+  macro: DisplayedMacroTypes;
   amount: number;
   max?: number;
 };
+
 export const ProgressBar = ({ macro, amount, max }: ProgressBarProps) => {
   const goals = useSelector((state: RootState) => state.userData.goals);
   const thisMacroGoal = max ?? goals[macro];
   const percent = Math.min((amount / thisMacroGoal) * 100, 100).toString();
-  const barColor = getColorForMacro(macro);
+  const barColor = DisplayedMacroConfig.find(
+    (macroConfig) => macroConfig.type === macro
+  )?.color;
 
   const getInnerBarStyling = () => {
     return {
@@ -30,9 +31,13 @@ export const ProgressBar = ({ macro, amount, max }: ProgressBarProps) => {
   };
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{`${getPrettyNameForMacro(
-        macro
-      )}: ${amount}${getPrettyUnitsForMacro(macro)}`}</Text>
+      <Text style={styles.text}>{`${
+        DisplayedMacroConfig.find((macroConfig) => macroConfig.type === macro)
+          ?.displayName
+      }: ${amount}${
+        DisplayedMacroConfig.find((macroConfig) => macroConfig.type === macro)
+          ?.shortUnit
+      }`}</Text>
       <View style={styles.barContainer}>
         <View style={styles.outerBar}>
           <View style={getInnerBarStyling()} />
