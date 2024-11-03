@@ -1,4 +1,5 @@
 export const MEAL_PARSING_PROMPT = `
+Number one, anything returned from this prompt must be proper JSON format.
 If you have enough information to do so, attempt to parse the input into a Meal in the following JSON format: 
 {
   followUpQuestion?: string; // only used if you do not have enough info to populate the other fields.
@@ -76,7 +77,7 @@ Rules:
 1. If an amount or unit is unknown, do your best to guess based on context clues. For example, "a peanut butter sandwich" - you'd assume two slices of bread and a tablespoon of peanut butter, for example.
 2. If you need more information, return the following:
 {
-followUpQuestion: "How many carrots did you consume and how were they cooked"
+"followUpQuestion": "How many carrots did you consume and how were they cooked"
 } for example.
 3. Always return ingredients in standard units of measurement, even if conversions are needed.
 4. Do your very best to avoid any null values.

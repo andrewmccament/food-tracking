@@ -24,13 +24,14 @@ export enum MessageFrom {
   GPT = "Nourishly",
 }
 
-type Message = {
+export type Message = {
   from: MessageFrom;
   contents: string;
 };
 
 export const Chat = ({ onMealRetrieval }: ChatProps) => {
   const [messages, setMessages] = React.useState<Message[]>([]);
+  const messagesRef = React.useRef<Message[]>();
   const [listening, setListening] = React.useState(false);
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const recording = React.useRef({} as Audio.Recording);
@@ -48,6 +49,10 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
       }
     };
   }, []);
+
+  React.useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const startLogging = async () => {
     setListening(true);
@@ -116,9 +121,10 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             .concat({ from: MessageFrom.GPT, contents: "..." });
         });
       }
-      const response = await parseMeal(transcription);
+      console.log(messagesRef.current);
+      const response = await parseMeal(transcription, messagesRef.current);
       if (!response?.error) {
-        if (response.mealId) {
+        if (response.meal) {
           dispatch(recordMeal(response));
 
           setMeal(response);
@@ -160,7 +166,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
           placeholder="Type to AI..."
           returnKeyType="send"
           onSubmitEditing={(event) => {
-            attemptParseMeal(event.nativeEvent.text);
+            attemptParseMeal(event.nativeEvent.text, false);
           }}
         />
         <View style={styles.speakButton}>
