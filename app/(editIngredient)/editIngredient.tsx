@@ -6,6 +6,8 @@ import {
   StyleSheet,
   useWindowDimensions,
   KeyboardAvoidingView,
+  TouchableOpacity,
+  Text,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { TabView, SceneMap } from "react-native-tab-view";
@@ -13,6 +15,7 @@ import { ManualIngredientEditor } from "@/components/EditIngredient/ManualIngred
 import { IngredientSearch } from "@/components/EditIngredient/IngredientSearch";
 import { updateIngredient } from "@/state/foodSlice";
 import { Ingredient } from "@/types/openAi.types";
+import { Colors } from "@/constants/Colors";
 
 export default function EditIngredientScreen() {
   const layout = useWindowDimensions();
@@ -20,8 +23,8 @@ export default function EditIngredientScreen() {
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    { key: "ManualEdit", title: "Manual" },
     { key: "Search", title: "Search" },
+    { key: "ManualEdit", title: "Manual" },
   ]);
 
   const { mealId, ingredient } = useLocalSearchParams();
@@ -44,7 +47,7 @@ export default function EditIngredientScreen() {
 
   const ManualEdit = () =>
     thisIngredient ? (
-      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={90}>
+      <KeyboardAvoidingView behavior="height">
         <ManualIngredientEditor
           ingredient={thisIngredient}
           onUpdateIngredient={(ingredient: Ingredient) => {
@@ -68,18 +71,64 @@ export default function EditIngredientScreen() {
   );
 
   const renderScene = SceneMap({
-    ManualEdit: ManualEdit,
     Search: Search,
+    ManualEdit: ManualEdit,
   });
+
+  const renderTabBar = (props) => {
+    const inputRange = props.navigationState.routes.map((x, i) => i);
+
+    return (
+      <View style={styles.tabBar}>
+        {props.navigationState.routes.map((route, i) => {
+          return (
+            <TouchableOpacity
+              style={{
+                ...styles.tabButton,
+                backgroundColor:
+                  index === i ? Colors.themeColorBackground : "black",
+              }}
+              onPress={() => setIndex(i)}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  ...(index === i ? styles.selectedButtonText : {}),
+                }}
+              >
+                {route.title}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    );
+  };
 
   return (
     <TabView
       navigationState={{ index, routes }}
       renderScene={renderScene}
+      renderTabBar={renderTabBar}
       onIndexChange={setIndex}
       initialLayout={{ width: layout.width }}
+      style={{ backgroundColor: "white" }}
     />
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  tabBar: {
+    flexDirection: "row",
+  },
+  tabButton: {
+    flex: 1,
+    borderRightWidth: 1,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  selectedButtonText: {
+    fontWeight: "500",
+  },
+});

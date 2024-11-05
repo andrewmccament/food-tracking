@@ -1,9 +1,10 @@
 import React from "react";
 import { View, StyleSheet, TextInput, ScrollView } from "react-native";
-import { getFoodById, searchFood } from "@/services/fatsecret";
+import { searchFood } from "@/services/fatsecret";
 import { FoodSearchV1Response } from "@/types/fatSecret.types";
 import { FoodSearchResults } from "@/components/EditIngredient/FoodSearchResults";
 import { Ingredient } from "@/types/openAi.types";
+import { Colors } from "@/constants/Colors";
 
 export type IngredientSearchProps = {
   initialSearch?: string;
@@ -20,6 +21,7 @@ export const IngredientSearch = ({
 
   const search = async (query: string, clear?: boolean) => {
     const results = await searchFood(query);
+    console.log(results);
     if (results) {
       setSearchResults(results);
       if (clear) {
@@ -37,7 +39,7 @@ export const IngredientSearch = ({
   return (
     <View style={styles.container}>
       <TextInput
-        placeholder="Type to AI..."
+        placeholder="Search"
         returnKeyType="search"
         blurOnSubmit
         ref={inputRef}
@@ -66,14 +68,16 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignItems: "center",
+    backgroundColor: "black",
   },
   searchBox: {
     borderWidth: 1,
     height: 40,
     width: "100%",
     paddingHorizontal: 8,
-    borderColor: "#22C2F1",
+    borderColor: Colors.themeColor,
     borderRadius: 8,
     fontSize: 18,
+    color: "white",
   },
 });

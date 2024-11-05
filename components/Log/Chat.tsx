@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   KeyboardAvoidingView,
+  TouchableOpacity,
 } from "react-native";
 import { Audio } from "expo-av";
 import { parseMeal, transcribeAudio } from "@/services/open-ai";
@@ -15,6 +16,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { Message, MessageFrom } from "./Message";
 import { Meal } from "@/types/openAi.types";
 import { ButtonStyle, ThemedButton } from "../ThemedButton";
+import SpeakSVG from "../../svg/speak.svg";
+import { Colors } from "@/constants/Colors";
 
 export type ChatProps = {
   onMealRetrieval: (mealId: string) => void;
@@ -172,6 +175,19 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
         </View>
       </ScrollView>
       <View style={styles.chatRow}>
+        <View style={styles.speakButton}>
+          <TouchableOpacity
+            onPress={() => {
+              listening ? stopLogging() : startLogging();
+            }}
+          >
+            <SpeakSVG
+              width={35}
+              height={35}
+              color={listening ? "red" : Colors.themeColor}
+            />
+          </TouchableOpacity>
+        </View>
         <TextInput
           style={styles.input}
           placeholder="Type to AI..."
@@ -184,15 +200,6 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             attemptParseMeal(event.nativeEvent.text, false);
           }}
         />
-        <View style={styles.speakButton}>
-          <ThemedButton
-            title={listening ? "Stop" : "Speak"}
-            style={ButtonStyle.DARK}
-            onPress={() => {
-              listening ? stopLogging() : startLogging();
-            }}
-          />
-        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -215,7 +222,10 @@ const styles = StyleSheet.create({
   chatRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 24,
+    marginTop: 12,
+    paddingBottom: 24,
+    paddingHorizontal: 12,
+    gap: 8,
   },
   input: {
     flex: 1,
@@ -229,7 +239,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     color: "white",
   },
-  speakButton: {
-    width: 90,
-  },
+  speakButton: {},
 });

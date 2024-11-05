@@ -57,6 +57,7 @@ export const ServingPicker = ({
       <Picker
         selectedValue={amount}
         style={styles.servingTypePicker}
+        itemStyle={{ color: "white" }}
         onValueChange={(itemValue: number) => {
           changeAmount(itemValue);
         }}
@@ -68,6 +69,7 @@ export const ServingPicker = ({
       <Picker
         style={styles.servingTypePicker}
         selectedValue={selectedUnitIndex}
+        itemStyle={{ color: "white" }}
         onValueChange={(itemValue: number) => {
           changeIndex(itemValue);
         }}

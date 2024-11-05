@@ -8,6 +8,7 @@ import {
   View,
   Text,
   KeyboardAvoidingView,
+  TouchableOpacity,
 } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -20,6 +21,8 @@ import MealSummary from "@/components/Shared/MealSummary";
 import { ProgressBar } from "@/components/Shared/ProgressBar";
 import { DisplayedMacroTypes, Meal } from "@/types/openAi.types";
 import { ThemedButton } from "@/components/ThemedButton";
+import AddSVG from "../../svg/log.svg";
+import { Colors } from "@/constants/Colors";
 
 export default function TodayScreen() {
   const date = new Date();
@@ -69,10 +72,11 @@ export default function TodayScreen() {
           ))}
         </View>
       </ScrollView>
-      <ThemedButton
-        title="Log Food"
-        onPress={() => router.push("../(log)/log")}
-      />
+      <View style={styles.logButton}>
+        <TouchableOpacity onPress={() => router.push("/(log)/log")}>
+          <AddSVG width={80} height={80} color={Colors.themeColor} />
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -104,5 +108,11 @@ const styles = StyleSheet.create({
   macros: {
     color: "white",
     padding: 12,
+  },
+  logButton: {
+    position: "absolute",
+    bottom: 30,
+    width: "100%",
+    alignItems: "center",
   },
 });

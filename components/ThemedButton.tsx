@@ -24,10 +24,13 @@ export const ThemedButton = ({ title, onPress, style }: ThemedButtonProps) => {
       <View
         style={{
           ...styles.button,
-          backgroundColor: style === 1 ? "black" : "white",
+          backgroundColor: style === 1 ? "black" : "black",
         }}
       >
-        <ThemedText style={{ color: style === 1 ? "white" : "black" }}>
+        <ThemedText
+          type="defaultSemiBold"
+          style={{ color: style === 1 ? "white" : "white" }}
+        >
           {title}
         </ThemedText>
       </View>
@@ -43,7 +46,7 @@ const styles = StyleSheet.create({
   },
   button: {
     borderColor: "#316A7D",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "black",
     borderWidth: 2,
     shadowRadius: 4,
     shadowColor: "gray",

@@ -27,6 +27,11 @@ import {
   Serving,
 } from "@/types/openAi.types";
 import { Picker } from "@react-native-picker/picker";
+import DeleteSVG from "../../svg/delete.svg";
+import EditSVG from "../../svg/edit.svg";
+import DoneSVG from "../../svg/done.svg";
+import AddSVG from "../../svg/add.svg";
+import { Colors } from "@/constants/Colors";
 
 export type MealSummaryProps = {
   mealId: string;
@@ -36,8 +41,8 @@ export type MealSummaryProps = {
   embedded?: boolean;
 };
 
-export type MacroBreakdownProps = { macros: Serving };
-export const MacroBreakdown = ({ macros }: MacroBreakdownProps) => {
+export type MacroBreakdownProps = { macros: Serving; textStyle?: any };
+export const MacroBreakdown = ({ macros, textStyle }: MacroBreakdownProps) => {
   return (
     <View>
       {DisplayedMacroIterator.map((macro, index) => (
@@ -46,6 +51,7 @@ export const MacroBreakdown = ({ macros }: MacroBreakdownProps) => {
             style={ProgressBarStyles.REVERSED}
             macro={macro}
             amount={macros[macro]}
+            textStyle={textStyle}
           />
         </View>
       ))}
@@ -71,6 +77,7 @@ export default function MealSummary({
   React.useEffect(() => setEditing(expanded ? editing : false), [expanded]);
 
   const [pickerCategory, setPickerCategory] = React.useState(meal?.meal);
+  React.useEffect(() => updateMealCategory(), [pickerCategory]);
 
   const dispatch = useDispatch();
 
@@ -88,7 +95,6 @@ export default function MealSummary({
 
   const updateMealCategory = () => {
     dispatch(updateMeal({ updatedMeal: { ...meal, meal: pickerCategory } }));
-    setEditing(false);
   };
 
   const updateMealSummary = (text: string) => {
@@ -102,14 +108,31 @@ export default function MealSummary({
           {capFirstLetter(meal.meal)}
         </ThemedText>
         <View style={styles.row}>
-          {meal.isAdded && <Button title="Delete" onPress={deleteMeal} />}
-          <Button
-            title="Edit"
-            onPress={() => {
-              setEditing(true);
-            }}
-          />
-          {allowAdding && <Button title="Add" onPress={() => onAdd()} />}
+          {editing ? (
+            <TouchableOpacity onPress={() => setEditing(false)}>
+              <DoneSVG width={30} height={30} fill="#316A7D" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => {
+                setEditing(true);
+              }}
+            >
+              <EditSVG width={30} height={25} />
+            </TouchableOpacity>
+          )}
+
+          {meal.isAdded && (
+            <TouchableOpacity onPress={deleteMeal}>
+              <DeleteSVG width={30} height={30} fill="#C2473E" />
+            </TouchableOpacity>
+          )}
+
+          {allowAdding && (
+            <TouchableOpacity onPress={() => onAdd()}>
+              <AddSVG width={30} height={30} color={Colors.themeColor} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       {editing && (
@@ -123,9 +146,6 @@ export default function MealSummary({
               <Picker.Item value={key} label={key}></Picker.Item>
             ))}
           </Picker>
-          <View style={styles.categoryPickerBtn}>
-            <Button title="Confirm" onPress={updateMealCategory} />
-          </View>
         </View>
       )}
       <View>
@@ -160,7 +180,9 @@ export default function MealSummary({
           onChangeText={(text) => updateMealSummary(text)}
         ></TextInput>
       ) : (
-        <ThemedText type="defaultSemiBold">{meal.summary}</ThemedText>
+        <ThemedText type="defaultSemiBold" style={{ marginTop: 8 }}>
+          {meal.summary}
+        </ThemedText>
       )}
       {expanded && (
         <ScrollView style={styles.ingredientList}>
@@ -200,6 +222,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     alignItems: "center",
+    gap: 8,
   },
   ingredientList: {
     gap: 12,
@@ -214,6 +237,8 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   infoPanel: {
     backgroundColor: "#ffffff",

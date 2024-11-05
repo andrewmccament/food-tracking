@@ -16,6 +16,7 @@ import { ProgressBar } from "../Shared/ProgressBar";
 import { convertFatSecretFood, scaleServing } from "@/helpers/food-utils";
 import { ThemedButton } from "../ThemedButton";
 import { ServingPicker } from "./ServingPicker";
+import { Colors } from "@/constants/Colors";
 
 export type FoodSearchResultsProps = {
   searchResults: FoodSearchV1Response;
@@ -68,7 +69,7 @@ export const FoodSearchResults = ({
   };
 
   return (
-    <View>
+    <View style={styles.list}>
       {searchResults?.foods?.food?.map((food, index) => (
         <View key={index} style={styles.resultContainer}>
           <TouchableOpacity onPress={() => expandIndex(index)}>
@@ -105,10 +106,17 @@ export const FoodSearchResults = ({
 };
 
 const styles = StyleSheet.create({
+  list: {
+    flexDirection: "column",
+    gap: 6,
+  },
   resultContainer: {
     paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 2,
     width: "100%",
     minHeight: 100,
+    backgroundColor: Colors.themeColorBackground,
   },
 });
