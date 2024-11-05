@@ -5,6 +5,8 @@ import {
   DisplayedMacroConfig,
   DisplayedMacroTypes,
 } from "@/types/openAi.types";
+import React from "react";
+import { ThemedText } from "../ThemedText";
 
 export enum ProgressBarStyles {
   DEFAULT = 0,
@@ -52,7 +54,8 @@ export const ProgressBar = ({
       }}
     >
       {style !== ProgressBarStyles.FULL_SCREEN && (
-        <Text
+        <ThemedText
+          useSystemTheme
           style={{
             ...styles.text,
             ...textStyle,
@@ -64,7 +67,7 @@ export const ProgressBar = ({
         }: ${amount}${
           DisplayedMacroConfig.find((macroConfig) => macroConfig.type === macro)
             ?.shortUnit
-        }`}</Text>
+        }`}</ThemedText>
       )}
       <View
         style={{

@@ -32,6 +32,7 @@ import EditSVG from "../../svg/edit.svg";
 import DoneSVG from "../../svg/done.svg";
 import AddSVG from "../../svg/add.svg";
 import { Colors } from "@/constants/Colors";
+import { ThemedView } from "../ThemedView";
 
 export type MealSummaryProps = {
   mealId: string;
@@ -102,15 +103,21 @@ export default function MealSummary({
   };
 
   return meal ? (
-    <View style={{ ...styles.infoPanel, borderRadius: embedded ? 12 : 12 }}>
+    <ThemedView
+      style={{ ...styles.infoPanel, borderRadius: embedded ? 12 : 12 }}
+    >
       <View style={styles.header}>
-        <ThemedText type="subtitle" onPress={() => setExpanded(!expanded)}>
+        <ThemedText
+          useSystemTheme
+          type="subtitle"
+          onPress={() => setExpanded(!expanded)}
+        >
           {capFirstLetter(meal.meal)}
         </ThemedText>
         <View style={styles.row}>
           {editing ? (
             <TouchableOpacity onPress={() => setEditing(false)}>
-              <DoneSVG width={30} height={30} fill="#316A7D" />
+              <DoneSVG width={30} height={30} fill="Colors.themeColor" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -153,22 +160,18 @@ export default function MealSummary({
           <ProgressBar
             macro={DisplayedMacroTypes.calories}
             amount={getSummedMacros([meal]).calories}
-            textStyle={{ color: "black" }}
           />
           <ProgressBar
             macro={DisplayedMacroTypes.net_carbohydrates}
             amount={getSummedMacros([meal]).net_carbohydrates}
-            textStyle={{ color: "black" }}
           />
           <ProgressBar
             macro={DisplayedMacroTypes.fat}
             amount={getSummedMacros([meal]).fat}
-            textStyle={{ color: "black" }}
           />
           <ProgressBar
             macro={DisplayedMacroTypes.protein}
             amount={getSummedMacros([meal]).protein}
-            textStyle={{ color: "black" }}
           />
         </View>
       </View>
@@ -180,7 +183,11 @@ export default function MealSummary({
           onChangeText={(text) => updateMealSummary(text)}
         ></TextInput>
       ) : (
-        <ThemedText type="defaultSemiBold" style={{ marginTop: 8 }}>
+        <ThemedText
+          useSystemTheme
+          type="defaultSemiBold"
+          style={{ marginTop: 8 }}
+        >
           {meal.summary}
         </ThemedText>
       )}
@@ -198,10 +205,10 @@ export default function MealSummary({
               }
             >
               <View style={styles.row}>
-                <ThemedText type="defaultSemiBold">
+                <ThemedText useSystemTheme type="defaultSemiBold">
                   {capFirstLetter(ingredient.food_name)}
                 </ThemedText>
-                <ThemedText type="default">
+                <ThemedText useSystemTheme type="default">
                   {` ${ingredient.serving.serving_description}`}
                 </ThemedText>
               </View>
@@ -210,7 +217,7 @@ export default function MealSummary({
           ))}
         </ScrollView>
       )}
-    </View>
+    </ThemedView>
   ) : (
     <></>
   );
@@ -241,7 +248,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   infoPanel: {
-    backgroundColor: "#ffffff",
     borderRadius: 0,
     padding: 12,
   },

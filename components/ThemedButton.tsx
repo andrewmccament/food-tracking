@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import {
   View,
   StyleSheet,
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   button: {
-    borderColor: "#316A7D",
+    borderColor: Colors.themeColor,
     backgroundColor: "black",
     borderWidth: 2,
     shadowRadius: 4,

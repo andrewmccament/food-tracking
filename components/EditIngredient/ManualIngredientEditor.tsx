@@ -18,6 +18,7 @@ import {
 import { ServingPicker } from "./ServingPicker";
 import { scaleServing } from "@/helpers/food-utils";
 import { Colors } from "@/constants/Colors";
+import { ThemedText } from "../ThemedText";
 
 export type ManualIngredientEditorProps = {
   ingredient: Ingredient;
@@ -62,21 +63,18 @@ export const ManualIngredientEditor = ({
             {capFirstLetter(ingredient?.food_name)}
           </TextInput>
           <View style={styles.panel}>
-            <MacroBreakdown
-              macros={ingredient?.serving}
-              textStyle={{ color: "white" }}
-            />
+            <MacroBreakdown macros={ingredient?.serving} />
           </View>
           <View style={styles.panel}>
             {DisplayedMacroIterator.map((macro, index) => (
               <View style={styles.macroEditor} key={index}>
-                <Text style={{ color: "white" }}>
+                <ThemedText>
                   {
                     DisplayedMacroConfig.find(
                       (macroConfig) => macroConfig.type === macro
                     )?.displayName
                   }
-                </Text>
+                </ThemedText>
                 <TextInput
                   onChangeText={(text) => updateMacro(macro, text)}
                   style={{ ...styles.searchBox, width: "auto" }}

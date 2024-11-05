@@ -213,9 +213,6 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingBottom: 24,
   },
-  text: {
-    color: "white",
-  },
   messages: {
     flexDirection: "column-reverse",
   },
@@ -231,7 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
     borderRadius: 8,
-    borderColor: "#316A7D",
+    borderColor: Colors.themeColor,
     borderWidth: 1,
     minHeight: 44,
     maxHeight: 100,

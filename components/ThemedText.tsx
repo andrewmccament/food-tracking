@@ -3,29 +3,39 @@ import { Text, type TextProps, StyleSheet, StyleProp } from "react-native";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type ThemedTextProps = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
+  useSystemTheme?: boolean;
+  alwaysDark?: boolean;
   type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
 };
 
 export function ThemedText({
   style,
-  lightColor,
-  darkColor,
+  useSystemTheme = true,
+  alwaysDark,
   type = "default",
   ...rest
 }: ThemedTextProps) {
-  const color = "black"; //useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color = alwaysDark
+    ? "black"
+    : useSystemTheme
+    ? useThemeColor({ light: "black", dark: "white" }, "text")
+    : "white";
 
   return (
     <Text
       style={[
         { color },
-        type === "default" ? styles.default : undefined,
-        type === "title" ? styles.title : undefined,
-        type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,
-        type === "subtitle" ? styles.subtitle : undefined,
-        type === "link" ? styles.link : undefined,
+        type === "default"
+          ? { ...styles.default, ...styles.shared }
+          : undefined,
+        type === "title" ? { ...styles.title, ...styles.shared } : undefined,
+        type === "defaultSemiBold"
+          ? { ...styles.defaultSemiBold, ...styles.shared }
+          : undefined,
+        type === "subtitle"
+          ? { ...styles.subtitle, ...styles.shared }
+          : undefined,
+        type === "link" ? { ...styles.link, ...styles.shared } : undefined,
         style,
       ]}
       {...rest}
@@ -34,6 +44,9 @@ export function ThemedText({
 }
 
 const styles = StyleSheet.create({
+  shared: {
+    fontFamily: "arial",
+  },
   default: {
     fontSize: 16,
     lineHeight: 24,

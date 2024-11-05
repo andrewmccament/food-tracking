@@ -13,7 +13,7 @@ export const Colors = {
   themeColorBackground: "#405944",
   light: {
     text: "#ffffff",
-    background: "black",
+    background: "white",
     themePositive: "#316A7D",
     themeNeutral: "#ffffff",
     tint: tintColorLight,
@@ -23,7 +23,7 @@ export const Colors = {
   },
   dark: {
     text: "#ECEDEE",
-    background: "#151718",
+    background: "#405944",
     tint: tintColorDark,
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",

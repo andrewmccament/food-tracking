@@ -16,6 +16,7 @@ import { IngredientSearch } from "@/components/EditIngredient/IngredientSearch";
 import { updateIngredient } from "@/state/foodSlice";
 import { Ingredient } from "@/types/openAi.types";
 import { Colors } from "@/constants/Colors";
+import { ThemedText } from "@/components/ThemedText";
 
 export default function EditIngredientScreen() {
   const layout = useWindowDimensions();
@@ -90,14 +91,13 @@ export default function EditIngredientScreen() {
               }}
               onPress={() => setIndex(i)}
             >
-              <Text
+              <ThemedText
                 style={{
-                  color: "white",
                   ...(index === i ? styles.selectedButtonText : {}),
                 }}
               >
                 {route.title}
-              </Text>
+              </ThemedText>
             </TouchableOpacity>
           );
         })}

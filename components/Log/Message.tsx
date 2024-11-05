@@ -5,6 +5,8 @@ import MealSummary from "../Shared/MealSummary";
 import { useDispatch } from "react-redux";
 import { logMeal } from "@/state/foodSlice";
 import { router } from "expo-router";
+import { ThemedText } from "../ThemedText";
+import { Colors } from "@/constants/Colors";
 export type MessageProps = {
   from: MessageFrom;
   content: string;
@@ -47,7 +49,12 @@ export const Message = ({ from, content, meal }: MessageProps) => {
           ...{ width: meal ? "100%" : "60%" },
         }}
       >
-        <Text style={{ fontSize: 18 }}>{content}</Text>
+        <ThemedText
+          alwaysDark={from === MessageFrom.GPT}
+          style={{ fontSize: 18 }}
+        >
+          {content}
+        </ThemedText>
         {meal && (
           <View style={styles.mealContainer}>
             <MealSummary
@@ -76,7 +83,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   userMessage: {
-    backgroundColor: "#22C2F1",
+    backgroundColor: Colors.themeColorBackground,
   },
   gptMessage: {
     backgroundColor: "#CACACA",
