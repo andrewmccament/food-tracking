@@ -1,14 +1,22 @@
 import React from "react";
 import { RootState } from "@/state/store";
-import { useLocalSearchParams } from "expo-router";
-import { View, StyleSheet, useWindowDimensions } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import {
+  View,
+  StyleSheet,
+  useWindowDimensions,
+  KeyboardAvoidingView,
+} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { TabView, SceneMap } from "react-native-tab-view";
 import { ManualIngredientEditor } from "@/components/EditIngredient/ManualIngredientEditor";
 import { IngredientSearch } from "@/components/EditIngredient/IngredientSearch";
+import { updateIngredient } from "@/state/foodSlice";
+import { Ingredient } from "@/types/openAi.types";
 
 export default function EditIngredientScreen() {
   const layout = useWindowDimensions();
+  const dispatch = useDispatch();
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
@@ -24,21 +32,38 @@ export default function EditIngredientScreen() {
   );
   const thisIngredient = meal?.ingredients[ingredientIndex];
 
+  const pushUpdateIngredient = (ingredient: Ingredient) => {
+    dispatch(
+      updateIngredient({
+        mealId: mealId,
+        ingredientIndex: ingredientIndex,
+        ingredient: ingredient,
+      })
+    );
+  };
+
   const ManualEdit = () =>
     thisIngredient ? (
-      <View>
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={90}>
         <ManualIngredientEditor
           ingredient={thisIngredient}
-          onUpdateIngredient={() => {}}
+          onUpdateIngredient={(ingredient: Ingredient) => {
+            pushUpdateIngredient(ingredient);
+          }}
         />
-      </View>
+      </KeyboardAvoidingView>
     ) : (
       <View></View>
     );
 
   const Search = () => (
     <View>
-      <IngredientSearch onSelectIngredient={() => {}} />
+      <IngredientSearch
+        initialSearch={thisIngredient?.food_name}
+        onSelectIngredient={(ingredient: Ingredient) => {
+          pushUpdateIngredient(ingredient);
+        }}
+      />
     </View>
   );
 

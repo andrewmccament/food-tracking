@@ -72,12 +72,13 @@ export const convertFatSecretFood = (
 
 export const scaleServing = (serving: Serving, actualAmount: number) => {
   if (!(serving && !Number.isNaN(actualAmount))) return null;
+
   const baseAmount = parseInt(serving.number_of_units);
   const divisor = baseAmount / actualAmount;
-  return {
+  const res = {
     ...serving,
     serving_description: `${actualAmount.toFixed(2)} ${
-      serving.metric_serving_unit
+      serving.measurement_description
     }`,
     metric_serving_amount: actualAmount.toFixed(3),
     number_of_units: actualAmount.toFixed(3),
@@ -102,6 +103,7 @@ export const scaleServing = (serving: Serving, actualAmount: number) => {
     calcium: divideString(serving.calcium, divisor),
     iron: divideString(serving.iron, divisor),
   };
+  return res;
 };
 
 const divideString = (str: string, divisor: number) =>

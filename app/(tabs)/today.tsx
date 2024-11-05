@@ -7,6 +7,7 @@ import {
   Button,
   View,
   Text,
+  KeyboardAvoidingView,
 } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -32,27 +33,37 @@ export default function TodayScreen() {
   const todayMacros = getSummedMacros(todaysMeals);
 
   return (
-    <View style={styles.todayContainer}>
-      <ScrollView style={styles.todayListContainer}>
-        <View style={styles.todayListContainer}>
-          <ThemedView style={styles.infoPanel}>
-            <ProgressBar
-              macro={DisplayedMacroTypes.calories}
-              amount={todayMacros.calories}
-            />
-            <ProgressBar
-              macro={DisplayedMacroTypes.net_carbohydrates}
-              amount={todayMacros.net_carbohydrates}
-            />
-            <ProgressBar
-              macro={DisplayedMacroTypes.fat}
-              amount={todayMacros.fat}
-            />
-            <ProgressBar
-              macro={DisplayedMacroTypes.protein}
-              amount={todayMacros.protein}
-            />
-          </ThemedView>
+    <KeyboardAvoidingView
+      behavior="padding"
+      keyboardVerticalOffset={90}
+      style={styles.todayContainer}
+    >
+      <View>
+        <View style={styles.macros}>
+          <ProgressBar
+            macro={DisplayedMacroTypes.calories}
+            amount={todayMacros.calories}
+            textStyle={{ color: "white" }}
+          />
+          <ProgressBar
+            macro={DisplayedMacroTypes.net_carbohydrates}
+            amount={todayMacros.net_carbohydrates}
+            textStyle={{ color: "white" }}
+          />
+          <ProgressBar
+            macro={DisplayedMacroTypes.fat}
+            amount={todayMacros.fat}
+            textStyle={{ color: "white" }}
+          />
+          <ProgressBar
+            macro={DisplayedMacroTypes.protein}
+            amount={todayMacros.protein}
+            textStyle={{ color: "white" }}
+          />
+        </View>
+      </View>
+      <ScrollView>
+        <View style={styles.mealsListContainer}>
           {todaysMeals.map((meal: Meal, index) => (
             <MealSummary mealId={meal.mealId} key={index} />
           ))}
@@ -62,7 +73,7 @@ export default function TodayScreen() {
         title="Log Food"
         onPress={() => router.push("../(log)/log")}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -70,10 +81,14 @@ const styles = StyleSheet.create({
   todayContainer: {
     flexDirection: "column",
     flex: 1,
-    backgroundColor: "#D5E1E1",
+    backgroundColor: "black",
+    gap: 12,
+    height: "100%",
   },
-  todayListContainer: {
-    flex: 1,
+  mealsListContainer: {
+    flexDirection: "column",
+    gap: 12,
+    paddingHorizontal: 12,
   },
   logButtonContainer: {},
   todayList: {
@@ -86,9 +101,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
   },
-  infoPanel: {
-    marginTop: 12,
-    borderRadius: 8,
+  macros: {
+    color: "white",
     padding: 12,
   },
 });

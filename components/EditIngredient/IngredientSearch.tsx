@@ -4,45 +4,52 @@ import { getFoodById, searchFood } from "@/services/fatsecret";
 import { FoodSearchV1Response } from "@/types/fatSecret.types";
 import { FoodSearchResults } from "@/components/EditIngredient/FoodSearchResults";
 import { Ingredient } from "@/types/openAi.types";
-import { convertFatSecretFood } from "@/helpers/food-utils";
 
 export type IngredientSearchProps = {
-  onSelectIngredient: (ingredient: Ingredient) => {};
+  initialSearch?: string;
+  onSelectIngredient: (ingredient: Ingredient) => void;
 };
 
 export const IngredientSearch = ({
+  initialSearch,
   onSelectIngredient,
 }: IngredientSearchProps) => {
+  const inputRef = React.useRef(null);
   const [searchResults, setSearchResults] =
     React.useState<FoodSearchV1Response>();
-  const [thisIngredient, updateThisIngredient] = React.useState<Ingredient>();
 
-  const search = async (query: string) => {
+  const search = async (query: string, clear?: boolean) => {
     const results = await searchFood(query);
     if (results) {
       setSearchResults(results);
+      if (clear) {
+        inputRef?.current?.clear();
+      }
     }
   };
 
-  const fatSecretFoodSelected = async (foodId: string) => {
-    const detailedFood = await getFoodById(foodId);
-    if (detailedFood) {
-      updateThisIngredient(convertFatSecretFood(detailedFood));
+  React.useEffect(() => {
+    if (initialSearch) {
+      search(initialSearch);
     }
-  };
+  }, [initialSearch]);
 
   return (
     <View style={styles.container}>
       <TextInput
+        placeholder="Type to AI..."
+        returnKeyType="search"
+        blurOnSubmit
+        ref={inputRef}
         style={styles.searchBox}
-        onSubmitEditing={(event) => search(event.nativeEvent.text)}
+        onSubmitEditing={(event) => search(event.nativeEvent.text, true)}
         clearButtonMode={"always"}
       ></TextInput>
       {searchResults && (
         <ScrollView>
           <FoodSearchResults
             searchResults={searchResults}
-            onFoodSelected={(foodId) => fatSecretFoodSelected(foodId)}
+            onFoodSelected={(food) => onSelectIngredient(food)}
           />
         </ScrollView>
       )}

@@ -9,6 +9,7 @@ import {
   Ingredient,
 } from "@/types/openAi.types";
 import { ServingPicker } from "./ServingPicker";
+import { scaleServing } from "@/helpers/food-utils";
 
 export type ManualIngredientEditorProps = {
   ingredient: Ingredient;
@@ -19,40 +20,44 @@ export const ManualIngredientEditor = ({
   ingredient,
   onUpdateIngredient,
 }: ManualIngredientEditorProps) => {
-  const [thisIngredient, updateThisIngredient] =
-    React.useState<Ingredient>(ingredient);
-
-  React.useEffect(() => onUpdateIngredient(thisIngredient), [thisIngredient]);
+  const [amount, setAmount] = React.useState(
+    ingredient.serving.number_of_units
+  );
 
   const editIngredientName = (text: string) => {
-    const updatedIngredient = { ...thisIngredient, food_name: text };
-    updateThisIngredient(updatedIngredient);
+    const updatedIngredient: Ingredient = { ...ingredient, food_name: text };
+    onUpdateIngredient(updatedIngredient);
   };
 
   const updateMacro = (macro: DisplayedMacroTypes, value: string) => {
     if (isNaN(parseInt(value))) return;
 
-    let thisIngredientCopy = JSON.parse(JSON.stringify(thisIngredient));
-    thisIngredientCopy.macronutrients[macro] = parseInt(value);
-    updateThisIngredient(thisIngredientCopy);
+    let thisIngredientCopy = JSON.parse(JSON.stringify(ingredient));
+    thisIngredientCopy.serving[macro] = parseInt(value);
+    onUpdateIngredient(thisIngredientCopy);
   };
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.searchBox}
-        onChangeText={editIngredientName}
+        onSubmitEditing={(event) => editIngredientName(event.nativeEvent.text)}
         clearButtonMode={"always"}
       >
-        {capFirstLetter(thisIngredient?.food_name)}
+        {capFirstLetter(ingredient?.food_name)}
       </TextInput>
       <ServingPicker
-        possibleServings={[thisIngredient?.serving]}
-        onAmountChange={() => {}}
+        possibleServings={[ingredient?.serving]}
+        onAmountChange={(val: number) => {
+          onUpdateIngredient({
+            ...ingredient,
+            serving: scaleServing(ingredient.serving, val),
+          });
+        }}
         onServingIndexChange={() => {}}
       />
       <View>
-        <MacroBreakdown macros={thisIngredient?.serving} />
+        <MacroBreakdown macros={ingredient?.serving} />
         <View style={styles.macroEditingList}>
           {DisplayedMacroIterator.map((macro, index) => (
             <View style={styles.macroEditor} key={index}>
@@ -68,7 +73,7 @@ export const ManualIngredientEditor = ({
                 style={{ ...styles.searchBox, width: "auto" }}
                 keyboardType="numeric"
               >
-                {thisIngredient?.serving[macro]}
+                {ingredient?.serving[macro]}
               </TextInput>
             </View>
           ))}

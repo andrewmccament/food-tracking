@@ -6,13 +6,27 @@ import {
   DisplayedMacroTypes,
 } from "@/types/openAi.types";
 
+export enum ProgressBarStyles {
+  DEFAULT = 0,
+  REVERSED = 1,
+  FULL_SCREEN = 2,
+}
+
 export type ProgressBarProps = {
   macro: DisplayedMacroTypes;
   amount: number;
   max?: number;
+  textStyle?: any;
+  style?: ProgressBarStyles;
 };
 
-export const ProgressBar = ({ macro, amount, max }: ProgressBarProps) => {
+export const ProgressBar = ({
+  macro,
+  amount,
+  max,
+  textStyle,
+  style = ProgressBarStyles.DEFAULT,
+}: ProgressBarProps) => {
   const goals = useSelector((state: RootState) => state.userData.goals);
   const thisMacroGoal = max ?? goals[macro];
   const percent = Math.min((amount / thisMacroGoal) * 100, 100).toString();
@@ -30,15 +44,34 @@ export const ProgressBar = ({ macro, amount, max }: ProgressBarProps) => {
     } as StyleProp<ViewStyle>;
   };
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>{`${
-        DisplayedMacroConfig.find((macroConfig) => macroConfig.type === macro)
-          ?.displayName
-      }: ${amount}${
-        DisplayedMacroConfig.find((macroConfig) => macroConfig.type === macro)
-          ?.shortUnit
-      }`}</Text>
-      <View style={styles.barContainer}>
+    <View
+      style={{
+        ...styles.container,
+        flexDirection:
+          style === ProgressBarStyles.DEFAULT ? "row" : "row-reverse",
+      }}
+    >
+      {style !== ProgressBarStyles.FULL_SCREEN && (
+        <Text
+          style={{
+            ...styles.text,
+            ...textStyle,
+            textAlign: style === ProgressBarStyles.DEFAULT ? "left" : "right",
+          }}
+        >{`${
+          DisplayedMacroConfig.find((macroConfig) => macroConfig.type === macro)
+            ?.displayName
+        }: ${amount}${
+          DisplayedMacroConfig.find((macroConfig) => macroConfig.type === macro)
+            ?.shortUnit
+        }`}</Text>
+      )}
+      <View
+        style={{
+          ...styles.barContainer,
+          width: style === ProgressBarStyles.FULL_SCREEN ? "100%" : "60%",
+        }}
+      >
         <View style={styles.outerBar}>
           <View style={getInnerBarStyling()} />
         </View>

@@ -28,15 +28,21 @@ export const ServingPicker = ({
       numericOptions.push(amountToLookFor);
       numericOptions = numericOptions.sort((a, b) => a - b);
     }
-    console.log(possibleServings[0], existsAlready);
     return amountToLookFor;
   };
 
   const [selectedUnitIndex, selectUnitIndex] = React.useState(0);
   const [amount, setAmount] = React.useState(getInitialAmount());
 
-  React.useEffect(() => onAmountChange(amount), [amount]);
-  React.useEffect(() => onServingIndexChange(selectedUnitIndex));
+  const changeAmount = (newAmount: number) => {
+    setAmount(newAmount);
+    onAmountChange(parseFloat(newAmount));
+  };
+
+  const changeIndex = (newIndex: number) => {
+    selectUnitIndex(newIndex);
+    onServingIndexChange(parseFloat(newIndex));
+  };
 
   React.useEffect(() => {
     if (possibleServings) {
@@ -52,7 +58,7 @@ export const ServingPicker = ({
         selectedValue={amount}
         style={styles.servingTypePicker}
         onValueChange={(itemValue: number) => {
-          setAmount(itemValue);
+          changeAmount(itemValue);
         }}
       >
         {numericOptions.map((option) => (
@@ -63,7 +69,7 @@ export const ServingPicker = ({
         style={styles.servingTypePicker}
         selectedValue={selectedUnitIndex}
         onValueChange={(itemValue: number) => {
-          selectUnitIndex(itemValue);
+          changeIndex(itemValue);
         }}
       >
         {possibleServings.map((serving, index) => (

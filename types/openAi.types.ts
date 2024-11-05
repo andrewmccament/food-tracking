@@ -3,19 +3,22 @@ export type Meal = {
   isAdded?: boolean;
   followUpQuestion?: string;
   date: string;
-  meal:
-    | "Early morning snack"
-    | "Breakfast"
-    | "Snack before lunch"
-    | "Uncategorized"
-    | "Lunch"
-    | "Snack before dinner"
-    | "Dinner"
-    | "Midnight Snack";
+  meal: MealCategories;
   summary: string;
   motivation: string;
   ingredients: Ingredient[];
 };
+
+export enum MealCategories {
+  UNCATEGORIZED = "Uncategorized",
+  SNACK_EARLY_MORNING = "Early morning snack",
+  BREAKFAST = "Breakfast",
+  SNACK_MID_MORNING = "Snack before lunch",
+  LUNCH = "Lunch",
+  SNACK_AFTERNOON = "Snack before dinner",
+  DINNER = "Dinner",
+  SNACK_MIDNIGHT = "Midnight Snack",
+}
 
 export type Serving = {
   serving_id?: string;

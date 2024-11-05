@@ -3,7 +3,22 @@ import React from "react";
 import { Button } from "react-native";
 export default function TabLayout() {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          backgroundColor: "black",
+          borderTopColor: "black",
+        },
+        tabBarActiveTintColor: "blue",
+        headerStyle: {
+          backgroundColor: "#000000",
+          borderColor: "black",
+        },
+        headerTitleStyle: {
+          color: "white",
+        },
+      }}
+    >
       <Tabs.Screen
         name="today"
         options={{

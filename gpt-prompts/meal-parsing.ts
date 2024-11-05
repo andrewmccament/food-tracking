@@ -26,7 +26,7 @@ Where Ingredient's structure is:
         serving_description: string;
         metric_serving_amount: string;
         metric_serving_unit: string;
-        number_of_units: string; // the "amount" in the serving of the measurement
+        number_of_units: string; // the "amount" in the serving of the measurement.  for example, "1/3 lb" would render an amount here of 0.33.
         measurement_description: string;
         calories: string;
         carbohydrate: string;
@@ -82,5 +82,5 @@ Rules:
 3. Always return ingredients in standard units of measurement, even if conversions are needed.
 4. Do your very best to avoid any null values.
 5. Only return JSON that is ready to JSON.parse() - no tags.  Ensure property names are quoted.
-6. serving.number_of_units MUST be accurate based on what the user said.  for example "I had 1.52 oz of whipped cream", number_of_units = "1.52"
+6. serving.number_of_units MUST be accurate based on what the user said.  for example "I had 1.52 oz of whipped cream", number_of_units = "1.52".  "I had 1/3 lb of beef" -> 0.33.
 `;

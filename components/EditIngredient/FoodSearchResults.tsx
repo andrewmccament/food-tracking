@@ -7,15 +7,19 @@ import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import React from "react";
 import { Picker } from "@react-native-picker/picker";
 import { getFoodById } from "@/services/fatsecret";
-import { DisplayedMacroIterator, Serving } from "@/types/openAi.types";
+import {
+  DisplayedMacroIterator,
+  Ingredient,
+  Serving,
+} from "@/types/openAi.types";
 import { ProgressBar } from "../Shared/ProgressBar";
-import { scaleServing } from "@/helpers/food-utils";
+import { convertFatSecretFood, scaleServing } from "@/helpers/food-utils";
 import { ThemedButton } from "../ThemedButton";
 import { ServingPicker } from "./ServingPicker";
 
 export type FoodSearchResultsProps = {
   searchResults: FoodSearchV1Response;
-  onFoodSelected: (foodId: string) => void;
+  onFoodSelected: (food: Ingredient) => void;
 };
 
 export const FoodSearchResults = ({
@@ -53,6 +57,16 @@ export const FoodSearchResults = ({
     }
   };
 
+  const chooseFood = () => {
+    const convertedFood = {
+      food_name: expandedFoodDetails?.food.food_name,
+      food_type: expandedFoodDetails?.food.food_type,
+      food_url: expandedFoodDetails?.food.food_url,
+      serving: servingPreview,
+    } as Ingredient;
+    onFoodSelected(convertedFood);
+  };
+
   return (
     <View>
       {searchResults?.foods?.food?.map((food, index) => (
@@ -81,7 +95,7 @@ export const FoodSearchResults = ({
                     />
                   ))}
               </View>
-              <ThemedButton onPress={() => {}} title="Add" />
+              <ThemedButton onPress={() => chooseFood()} title="Add" />
             </View>
           )}
         </View>

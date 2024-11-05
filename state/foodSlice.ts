@@ -102,6 +102,14 @@ export const foodSlice = createSlice({
         action.payload.ingredient;
       state.todaysMeals[mealIndex] = meal;
     },
+    updateMeal: (state, action: PayloadAction<{ updatedMeal: Meal }>) => {
+      const index = state.todaysMeals.findIndex(
+        (meal) => meal.mealId === action.payload.updatedMeal.mealId
+      );
+      if (index > -1) {
+        state.todaysMeals[index] = action.payload.updatedMeal;
+      }
+    },
   },
 });
 
@@ -113,6 +121,7 @@ export const {
   addIngredient,
   removeIngredient,
   updateIngredient,
+  updateMeal,
 } = foodSlice.actions;
 
 export default foodSlice.reducer;
