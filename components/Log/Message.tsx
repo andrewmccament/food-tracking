@@ -1,8 +1,14 @@
+import { Meal } from "@/types/openAi.types";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import MealSummary from "../Shared/MealSummary";
+import { useDispatch } from "react-redux";
+import { logMeal } from "@/state/foodSlice";
+import { router } from "expo-router";
 export type MessageProps = {
   from: MessageFrom;
   content: string;
+  meal?: Meal;
 };
 
 export enum MessageFrom {
@@ -13,10 +19,17 @@ export enum MessageFrom {
 export type Message = {
   from: MessageFrom;
   contents: string;
+  meal?: Meal;
 };
 
-export const Message = ({ from, content }: MessageProps) => {
+export const Message = ({ from, content, meal }: MessageProps) => {
   const loading = content === "...";
+  const dispatch = useDispatch();
+
+  const addMeal = () => {
+    dispatch(logMeal(meal.mealId));
+    router.back();
+  };
 
   return (
     <View
@@ -31,9 +44,20 @@ export const Message = ({ from, content }: MessageProps) => {
           ...(from === MessageFrom.GPT
             ? styles.gptMessage
             : styles.userMessage),
+          ...{ width: meal ? "100%" : "60%" },
         }}
       >
-        <Text>{content}</Text>
+        <Text style={{ fontSize: 18 }}>{content}</Text>
+        {meal && (
+          <View style={styles.mealContainer}>
+            <MealSummary
+              embedded
+              mealId={meal.mealId}
+              onAdd={addMeal}
+              allowAdding
+            />
+          </View>
+        )}
       </View>
     </View>
   );
@@ -49,11 +73,15 @@ const styles = StyleSheet.create({
     width: "60%",
     borderRadius: 16,
     padding: 12,
+    fontSize: 18,
   },
   userMessage: {
     backgroundColor: "#22C2F1",
   },
   gptMessage: {
     backgroundColor: "#CACACA",
+  },
+  mealContainer: {
+    paddingTop: 8,
   },
 });

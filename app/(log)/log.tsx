@@ -37,54 +37,18 @@ export default function LoggingScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topSection}>
-        <Chat
-          onMealRetrieval={(thisMealId) => {
-            mealId.current = thisMealId;
-            setMealIdChanged(thisMealId);
-          }}
-        />
-        {mealId.current ? (
-          <MealSummary
-            mealId={mealId.current}
-            allowAdding
-            onAdd={() => addMeal()}
-            expandedByDefault
-          />
-        ) : (
-          <></>
-        )}
-      </View>
-      <View style={styles.bottomSection}>
-        {mealId.current ? (
-          <MealSummary
-            mealId={mealId.current}
-            allowAdding
-            onAdd={() => addMeal()}
-            expandedByDefault
-          />
-        ) : (
-          <></>
-        )}
-      </View>
+      <Chat
+        onMealRetrieval={(thisMealId) => {
+          mealId.current = thisMealId;
+          setMealIdChanged(thisMealId);
+        }}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
-    flex: 1,
     height: "100%",
-    justifyContent: "space-between",
-    backgroundColor: "#D5E1E1",
-  },
-  topSection: {
-    padding: 0,
-    height: "40%",
-  },
-  bottomSection: {
-    flex: 1,
-    justifyContent: "flex-start",
   },
 });

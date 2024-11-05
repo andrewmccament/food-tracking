@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Audio } from "expo-av";
 import { parseMeal, transcribeAudio } from "@/services/open-ai";
@@ -28,6 +29,14 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
   const [transcription, setTranscription] = React.useState<string>();
   const [meal, setMeal] = React.useState<Meal>();
   const dispatch = useDispatch();
+
+  const scrollViewRef = React.useRef(null);
+  const inputRef = React.useRef(null);
+
+  React.useEffect(() => {
+    // Scroll to the bottom when new messages are added
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
   // start logging automatically when the chat component first mounts (after waiting a second)
   React.useEffect(() => {
@@ -105,13 +114,13 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             .concat({ from: MessageFrom.GPT, contents: "..." });
         });
       } else {
+        inputRef.current?.clear();
         setMessages((previous) => {
           return previous
             .concat({ from: MessageFrom.USER, contents: transcription })
             .concat({ from: MessageFrom.GPT, contents: "..." });
         });
       }
-      console.log(messagesRef.current);
       const response = await parseMeal(transcription, messagesRef.current);
       if (!response?.error) {
         if (response.meal) {
@@ -123,6 +132,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             previous.slice(0, -1).concat({
               from: MessageFrom.GPT,
               contents: response.motivation,
+              meal: response,
             })
           );
         } else {
@@ -144,17 +154,32 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
     }
   };
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.messages}>
-        {messages.map((message, index) => (
-          <Message from={message.from} content={message.contents} key={index} />
-        ))}
+    <KeyboardAvoidingView
+      behavior="padding"
+      keyboardVerticalOffset={90}
+      style={styles.container}
+    >
+      <ScrollView ref={scrollViewRef}>
+        <View>
+          {messages.map((message, index) => (
+            <Message
+              from={message.from}
+              content={message.contents}
+              meal={message.meal}
+              key={index}
+            />
+          ))}
+        </View>
       </ScrollView>
       <View style={styles.chatRow}>
         <TextInput
           style={styles.input}
           placeholder="Type to AI..."
           returnKeyType="send"
+          blurOnSubmit
+          ref={inputRef}
+          multiline
+          numberOfLines={5}
           onSubmitEditing={(event) => {
             attemptParseMeal(event.nativeEvent.text, false);
           }}
@@ -169,7 +194,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
           />
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -179,7 +204,7 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "black",
     padding: 8,
-    paddingBottom: 0,
+    paddingBottom: 24,
   },
   text: {
     color: "white",
@@ -190,14 +215,18 @@ const styles = StyleSheet.create({
   chatRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 24,
   },
   input: {
     flex: 1,
-    paddingHorizontal: 8,
+    padding: 8,
     borderRadius: 8,
     borderColor: "#316A7D",
     borderWidth: 1,
-    height: 44,
+    minHeight: 44,
+    maxHeight: 100,
+    fontSize: 18,
+    justifyContent: "center",
     color: "white",
   },
   speakButton: {

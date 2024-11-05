@@ -29,6 +29,7 @@ export type MealSummaryProps = {
   allowAdding?: boolean;
   onAdd: () => void;
   expandedByDefault?: boolean;
+  embedded?: boolean;
 };
 
 export type MacroBreakdownProps = { macros: Serving };
@@ -49,6 +50,7 @@ export default function MealSummary({
   allowAdding,
   onAdd,
   expandedByDefault = false,
+  embedded = false,
 }: MealSummaryProps) {
   const [expanded, setExpanded] = React.useState(expandedByDefault);
   const meal = useSelector((state: RootState) => state.food.todaysMeals).find(
@@ -70,7 +72,7 @@ export default function MealSummary({
   };
 
   return meal ? (
-    <View style={styles.infoPanel}>
+    <View style={{ ...styles.infoPanel, borderRadius: embedded ? 12 : 0 }}>
       <View style={styles.header}>
         <ThemedText type="subtitle" onPress={() => setExpanded(!expanded)}>
           {capFirstLetter(meal.meal)}
