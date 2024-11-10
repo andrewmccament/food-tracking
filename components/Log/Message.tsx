@@ -50,7 +50,7 @@ export const Message = ({ from, content, meal }: MessageProps) => {
         }}
       >
         <ThemedText
-          alwaysDark={from === MessageFrom.GPT}
+          colorOverride={from === MessageFrom.GPT}
           style={{ fontSize: 18 }}
         >
           {content}

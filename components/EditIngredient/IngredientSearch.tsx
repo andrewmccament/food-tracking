@@ -21,7 +21,6 @@ export const IngredientSearch = ({
 
   const search = async (query: string, clear?: boolean) => {
     const results = await searchFood(query);
-    console.log(results);
     if (results) {
       setSearchResults(results);
       if (clear) {

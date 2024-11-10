@@ -1,86 +1,67 @@
 export const MEAL_PARSING_PROMPT = `
-Number one, anything returned from this prompt must be proper JSON format.
-If you have enough information to do so, attempt to parse the input into a Meal in the following JSON format: 
+Ensure that the provided serving amounts for each ingredient are accurately reflected in the JSON output format.
+
+If enough information is provided, attempt to parse the input into a Meal in the following JSON format: 
+
 {
-  followUpQuestion?: string; // only used if you do not have enough info to populate the other fields.
-  meal:
-    | "Early morning snack"
-    | "Breakfast"
-    | "Snack before lunch"
-    | "Uncategorized"
-    | "Lunch"
-    | "Snack before dinner"
-    | "Dinner"
-    | "Midnight Snack"; // use context clues to ascertain which meal category best fits.  ONLY USE THESE VALUES.
-  summary: string; // example: "A tasty sandwich with arugula, honey mustard, ham and cheddar cheese."
-  motivation: string; //example: "Well done!  You did a great job incorporating green vegetables."
-  ingredients: Ingredient[]
+  "followUpQuestion"?: string, // Only used if you do not have enough info to populate the other fields.
+  "meal": "Early morning snack" | "Breakfast" | "Snack before lunch" | "Uncategorized" | "Lunch" | "Snack before dinner" | "Dinner" | "Midnight Snack", // Use context clues to ascertain which meal category best fits. ONLY USE THESE VALUES.
+  "summary": string, // Example: "A tasty sandwich with arugula, honey mustard, ham and cheddar cheese."
+  "motivation": string, // Example: "Well done! You did a great job incorporating green vegetables."
+  "ingredients": Ingredient[]
 }
 
 Where Ingredient's structure is: 
 { 
-    food_name: string;
-    food_type: string;
-    food_url: string;
-      serving: {
-        serving_description: string;
-        metric_serving_amount: string;
-        metric_serving_unit: string;
-        number_of_units: string; // the "amount" in the serving of the measurement.  for example, "1/3 lb" would render an amount here of 0.33.
-        measurement_description: string;
-        calories: string;
-        carbohydrate: string;
-        protein: string;
-        fat: string;
-        saturated_fat: string;
-        polyunsaturated_fat: string;
-        monounsaturated_fat: string;
-        cholesterol: string;
-        sodium: string;
-        potassium: string;
-        fiber: string;
-        sugar: string;
-        vitamin_a: string;
-        vitamin_c: string;
-        calcium: string;
-        iron: string;
-        net_carbohydrates: string;
-        confidence: number; // use this to provide a score from 0-10 representing your confidence in the accuracy of the nutritional data
-    };
-  }
+    "food_name": string,
+    "food_type": string,
+    "food_url": string,
+    "serving": {
+        "serving_description": string, // The amount provided by the user must be reflected here accurately.
+        "metric_serving_amount": string,
+        "metric_serving_unit": string,
+        "number_of_units": string, // The amount provided by the user must be reflected here accurately.
+        "measurement_description": string,
+        "calories": string,
+        "carbohydrate": string,
+        "protein": string,
+        "fat": string,
+        "saturated_fat": string,
+        "polyunsaturated_fat": string,
+        "monounsaturated_fat": string,
+        "cholesterol": string,
+        "sodium": string,
+        "potassium": string,
+        "fiber": string,
+        "sugar": string,
+        "vitamin_a": string,
+        "vitamin_c": string,
+        "calcium": string,
+        "iron": string,
+        "net_carbohydrates": string,
+        "confidence": number // Confidence score from 0-10 representing the accuracy of the nutritional data
+    }
+}
 
-An example of serving data is as follows: {
-          "serving_description": "1 tbsp",
-          "metric_serving_amount": "14.900",
-          "metric_serving_unit": "g",
-          "number_of_units": "1.000",
-          "measurement_description": "tbsp",
-          "calories": "51",
-          "carbohydrate": "0.42",
-          "protein": "0.31",
-          "fat": "5.51",
-          "saturated_fat": "3.432",
-          "polyunsaturated_fat": "0.205",
-          "monounsaturated_fat": "1.592",
-          "cholesterol": "20",
-          "sodium": "6",
-          "potassium": "11",
-          "fiber": "0",
-          "sugar": "0.02",
-          "vitamin_a": "61",
-          "vitamin_c": "0.1",
-          "calcium": "10",
-          "iron": "0.00"
-        }
+Make sure to follow these specific rules:
 
-Rules:
-1. If an amount or unit is unknown, do your best to guess based on context clues. For example, "a peanut butter sandwich" - you'd assume two slices of bread and a tablespoon of peanut butter, for example.
-2. If you need more information, return the following:
-{
-"followUpQuestion": "How many carrots did you consume and how were they cooked"
-} for example.
-3. Always return ingredients in standard units of measurement, even if conversions are needed.
-4. Do your very best to avoid any null values.
-5. Only return JSON that is ready to JSON.parse() - no tags.  Ensure property names are quoted.
-6. serving.number_of_units MUST be accurate based on what the user said.  for example "I had 1.52 oz of whipped cream", number_of_units = "1.52".  "I had 1/3 lb of beef" -> 0.33.
+# Rules
+1. If an amount or unit is unknown, do your best to guess based on context clues. Example: "a peanut butter sandwich" - assume two slices of bread and a tablespoon of peanut butter.
+2. Always accurately reflect serving amounts provided by the user in the JSON, especially in the "number_of_units" field. This serves as the **source of truth** for serving quantities.
+3. If you need more information, return the "followUpQuestion". Example: "followUpQuestion": "How many carrots did you consume and how were they cooked?".
+4. Always return ingredients using **standard units of measurement**, even if conversions are needed.
+5. Do your best to **avoid null values**; populate all fields if possible based on the given input.
+6. Only return JSON that is ready to use with **JSON.parse()**—no extraneous characters or tags.
+7. The "number_of_units"and "serving description" field must **strictly follow the serving quantity** described by the user. For example:
+   - "I had 1.52 oz of whipped cream" -> "number_of_units": "1.52"
+   - "I had 1/3 lb of beef" -> "number_of_units": "0.33"
+
+# Output Format
+Return JSON in the following format:
+- JSON: An object structure without tags, using quotes for all property names.
+
+# Notes
+- Always ensure to repeat and strictly adhere to the user-provided serving amount.
+- Be cautious of accuracy when converting servings.
+- If no explicit serving size is given, use reasonable estimations based on the usual portion sizes for common meals and ingredients.
 `;

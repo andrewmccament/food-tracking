@@ -63,18 +63,22 @@ export default function TodayScreen() {
       <View>
         <View style={styles.macros}>
           <ProgressBar
+            textColor="white"
             macro={DisplayedMacroTypes.calories}
             amount={todayMacros.calories}
           />
           <ProgressBar
+            textColor="white"
             macro={DisplayedMacroTypes.net_carbohydrates}
             amount={todayMacros.net_carbohydrates}
           />
           <ProgressBar
+            textColor="white"
             macro={DisplayedMacroTypes.fat}
             amount={todayMacros.fat}
           />
           <ProgressBar
+            textColor="white"
             macro={DisplayedMacroTypes.protein}
             amount={todayMacros.protein}
           />

@@ -19,6 +19,7 @@ export type ProgressBarProps = {
   amount: number;
   max?: number;
   textStyle?: any;
+  textColor?: string;
   style?: ProgressBarStyles;
 };
 
@@ -27,6 +28,7 @@ export const ProgressBar = ({
   amount,
   max,
   textStyle,
+  textColor,
   style = ProgressBarStyles.DEFAULT,
 }: ProgressBarProps) => {
   const goals = useSelector((state: RootState) => state.userData.goals);
@@ -55,7 +57,7 @@ export const ProgressBar = ({
     >
       {style !== ProgressBarStyles.FULL_SCREEN && (
         <ThemedText
-          useSystemTheme
+          colorOverride={textColor}
           style={{
             ...styles.text,
             ...textStyle,

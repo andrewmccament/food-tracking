@@ -29,7 +29,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="today"
         options={{
-          title: "Log",
+          title: "Today",
           tabBarLabel: () => <></>,
           tabBarIcon: (color) => (
             <HomeSVG

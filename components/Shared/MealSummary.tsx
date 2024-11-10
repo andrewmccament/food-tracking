@@ -108,7 +108,6 @@ export default function MealSummary({
     >
       <View style={styles.header}>
         <ThemedText
-          useSystemTheme
           type="subtitle"
           onPress={() => setExpanded(!expanded)}
         >
@@ -184,7 +183,6 @@ export default function MealSummary({
         ></TextInput>
       ) : (
         <ThemedText
-          useSystemTheme
           type="defaultSemiBold"
           style={{ marginTop: 8 }}
         >
@@ -205,10 +203,10 @@ export default function MealSummary({
               }
             >
               <View style={styles.row}>
-                <ThemedText useSystemTheme type="defaultSemiBold">
+                <ThemedText type="defaultSemiBold">
                   {capFirstLetter(ingredient.food_name)}
                 </ThemedText>
-                <ThemedText useSystemTheme type="default">
+                <ThemedText type="default">
                   {` ${ingredient.serving.serving_description}`}
                 </ThemedText>
               </View>

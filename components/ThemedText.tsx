@@ -3,23 +3,19 @@ import { Text, type TextProps, StyleSheet, StyleProp } from "react-native";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type ThemedTextProps = TextProps & {
-  useSystemTheme?: boolean;
-  alwaysDark?: boolean;
+  colorOverride?: string;
   type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
 };
 
 export function ThemedText({
   style,
-  useSystemTheme = true,
-  alwaysDark,
+  colorOverride,
   type = "default",
   ...rest
 }: ThemedTextProps) {
-  const color = alwaysDark
-    ? "black"
-    : useSystemTheme
-    ? useThemeColor({ light: "black", dark: "white" }, "text")
-    : "white";
+  const color = colorOverride
+    ? colorOverride
+    : useThemeColor({ light: "black", dark: "white" }, "text");
 
   return (
     <Text
