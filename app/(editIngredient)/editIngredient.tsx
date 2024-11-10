@@ -31,7 +31,7 @@ export default function EditIngredientScreen() {
   const { mealId, ingredient } = useLocalSearchParams();
   if (!(mealId && ingredient)) return;
   const ingredientIndex = parseInt(ingredient[0]);
-  const meal = useSelector((state: RootState) => state.food.todaysMeals).find(
+  const meal = useSelector((state: RootState) => state.food.meals).find(
     (meal) => meal.mealId === mealId
   );
   const thisIngredient = meal?.ingredients[ingredientIndex];

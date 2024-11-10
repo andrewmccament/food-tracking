@@ -43,7 +43,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="foods"
         options={{
-          title: "",
+          title: "Recipes",
           tabBarLabel: () => <></>,
           tabBarIcon: (color) => (
             <MyFoodsSVG

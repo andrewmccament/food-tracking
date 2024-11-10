@@ -10,7 +10,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Audio } from "expo-av";
-import { parseMeal, transcribeAudio } from "@/services/open-ai";
+import {
+  parseMeal,
+  parseMealRecipe,
+  transcribeAudio,
+} from "@/services/open-ai";
 import { recordMeal } from "@/state/foodSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { Message, MessageFrom } from "./Message";
@@ -18,12 +22,15 @@ import { Meal } from "@/types/openAi.types";
 import { ButtonStyle, ThemedButton } from "../ThemedButton";
 import SpeakSVG from "../../svg/speak.svg";
 import { Colors } from "@/constants/Colors";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 
 export type ChatProps = {
   onMealRetrieval: (mealId: string) => void;
 };
 
 export const Chat = ({ onMealRetrieval }: ChatProps) => {
+  const { logMode } = useLocalSearchParams();
+
   const [messages, setMessages] = React.useState<Message[]>([]);
   const messagesRef = React.useRef<Message[]>();
   const [listening, setListening] = React.useState(false);
@@ -124,7 +131,12 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             .concat({ from: MessageFrom.GPT, contents: "..." });
         });
       }
-      const response = await parseMeal(transcription, messagesRef.current);
+      const response =
+        logMode === "recipe"
+          ? await parseMealRecipe(transcription, messagesRef.current)
+          : await parseMeal(transcription, messagesRef.current);
+
+      console.log(response);
       if (!response?.error) {
         if (response.meal) {
           dispatch(recordMeal(response));

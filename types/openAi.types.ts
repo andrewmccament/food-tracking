@@ -7,6 +7,12 @@ export type Meal = {
   summary: string;
   motivation: string;
   ingredients: Ingredient[];
+  recipe?: RecipeData;
+};
+
+export type RecipeData = {
+  yields: number;
+  title: string;
 };
 
 export enum MealCategories {

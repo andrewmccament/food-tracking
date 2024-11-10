@@ -3,11 +3,11 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { Ingredient, Meal } from "@/types/openAi.types";
 
 export interface foodState {
-  todaysMeals: Meal[];
+  meals: Meal[];
 }
 
 const initialState: foodState = {
-  todaysMeals: [],
+  meals: [],
 };
 
 export const foodSlice = createSlice({
@@ -16,33 +16,33 @@ export const foodSlice = createSlice({
   reducers: {
     recordMeal: (state, action: PayloadAction<Meal>) => {
       // record just adds the meal to the array so it can be edited
-      state.todaysMeals = state.todaysMeals.concat(action.payload);
+      state.meals = state.meals.concat(action.payload);
     },
     logMeal: (state, action: PayloadAction<string>) => {
       // log meal makes it visible in today
-      const mealIndex = state.todaysMeals.findIndex(
+      const mealIndex = state.meals.findIndex(
         (meal) => meal.mealId === action.payload
       );
       if (mealIndex >= 0) {
-        state.todaysMeals[mealIndex].isAdded = true;
-        state.todaysMeals = state.todaysMeals.filter((meal) => meal.isAdded);
+        state.meals[mealIndex].isAdded = true;
+        state.meals = state.meals.filter((meal) => meal.isAdded);
       } else {
         console.error(
           "Failed to find meal with id " + action.payload,
-          state.todaysMeals
+          state.meals
         );
       }
     },
     removeMeal: (state, action: PayloadAction<string>) => {
-      state.todaysMeals = state.todaysMeals.filter(
+      state.meals = state.meals.filter(
         (meal) => meal.mealId !== action.payload
       );
     },
     addIngredient: (state, action: PayloadAction<string>) => {
-      const mealIndex = state.todaysMeals.findIndex(
+      const mealIndex = state.meals.findIndex(
         (meal) => meal.mealId === action.payload
       );
-      const meal = state.todaysMeals[mealIndex];
+      const meal = state.meals[mealIndex];
       meal.ingredients.push({
         food_name: "New Ingredient",
         food_type: "",
@@ -73,18 +73,18 @@ export const foodSlice = createSlice({
           confidence: 10,
         },
       });
-      state.todaysMeals[mealIndex] = meal;
+      state.meals[mealIndex] = meal;
     },
     removeIngredient: (
       state,
       action: PayloadAction<{ mealId: string; ingredientIndex: number }>
     ) => {
-      const mealIndex = state.todaysMeals.findIndex(
+      const mealIndex = state.meals.findIndex(
         (meal) => meal.mealId === action.payload.mealId
       );
-      const meal = state.todaysMeals[mealIndex];
+      const meal = state.meals[mealIndex];
       meal.ingredients.splice(action.payload.ingredientIndex, 1);
-      state.todaysMeals[mealIndex] = meal;
+      state.meals[mealIndex] = meal;
     },
     updateIngredient: (
       state,
@@ -94,20 +94,20 @@ export const foodSlice = createSlice({
         ingredient: Ingredient;
       }>
     ) => {
-      const mealIndex = state.todaysMeals.findIndex(
+      const mealIndex = state.meals.findIndex(
         (meal) => meal.mealId === action.payload.mealId
       );
-      const meal = state.todaysMeals[mealIndex];
+      const meal = state.meals[mealIndex];
       meal.ingredients[action.payload.ingredientIndex] =
         action.payload.ingredient;
-      state.todaysMeals[mealIndex] = meal;
+      state.meals[mealIndex] = meal;
     },
     updateMeal: (state, action: PayloadAction<{ updatedMeal: Meal }>) => {
-      const index = state.todaysMeals.findIndex(
+      const index = state.meals.findIndex(
         (meal) => meal.mealId === action.payload.updatedMeal.mealId
       );
       if (index > -1) {
-        state.todaysMeals[index] = action.payload.updatedMeal;
+        state.meals[index] = action.payload.updatedMeal;
       }
     },
   },

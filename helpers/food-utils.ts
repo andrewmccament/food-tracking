@@ -33,6 +33,30 @@ export const getSummedMacros = (meals: Meal[]) => {
   return totals;
 };
 
+export const getRecipeSummedMacros = (meal: Meal) => {
+  let totals: DisplayedMacros = {
+    calories: 0,
+    carbohydrate: 0,
+    fiber: 0,
+    net_carbohydrates: 0,
+    protein: 0,
+    fat: 0,
+    sugar: 0,
+  };
+
+  const keys = Object.keys(totals);
+
+  for (let key of keys) {
+    for (let ingredient of meal.ingredients) {
+      totals[key] += parseInt(ingredient.serving[key]) / meal.recipe?.yields;
+    }
+  }
+  for (let key of keys) {
+    totals[key] = Math.round(totals[key]);
+  }
+  return totals;
+};
+
 export const sortMealsByCategory = (meals: Meal[]) => {
   const mealRanking: string[] = [
     "uncategorized",

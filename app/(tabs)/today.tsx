@@ -30,11 +30,11 @@ export default function TodayScreen() {
   const todayDate = `${date.getFullYear()}${
     date.getMonth() + 1
   }${date.getDate()}`;
-  let todaysMeals = useSelector(
-    (state: RootState) => state.food.todaysMeals
-  ).filter((meal) => meal?.isAdded && meal?.date === todayDate);
-  todaysMeals = sortMealsByCategory(todaysMeals);
-  const todayMacros = getSummedMacros(todaysMeals);
+  let meals = useSelector((state: RootState) => state.food.meals).filter(
+    (meal) => meal?.isAdded && meal?.date === todayDate && !meal?.recipe
+  );
+  meals = sortMealsByCategory(meals);
+  const todayMacros = getSummedMacros(meals);
 
   return (
     <KeyboardAvoidingView
@@ -86,7 +86,7 @@ export default function TodayScreen() {
       </View>
       <ScrollView>
         <View style={{ ...styles.mealsListContainer }}>
-          {todaysMeals.map((meal: Meal, index) => (
+          {meals.map((meal: Meal, index) => (
             <View key={index}>
               <MealSummary mealId={meal.mealId} key={index} />
             </View>
@@ -95,7 +95,9 @@ export default function TodayScreen() {
       </ScrollView>
       <View style={styles.logButton}>
         <TouchableOpacity
-          onPress={() => router.push("/(log)/log")}
+          onPress={() =>
+            router.push({ pathname: "/(log)/log", params: { logMode: "meal" } })
+          }
           style={{ zIndex: 1000 }}
         >
           <AddSVG

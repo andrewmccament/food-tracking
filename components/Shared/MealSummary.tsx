@@ -1,4 +1,4 @@
-import { getSummedMacros } from "@/helpers/food-utils";
+import { getRecipeSummedMacros, getSummedMacros } from "@/helpers/food-utils";
 import { capFirstLetter } from "@/helpers/ui";
 import { router } from "expo-router";
 import React from "react";
@@ -11,6 +11,7 @@ import {
   Alert,
   TouchableOpacity,
   TextInput,
+  useColorScheme,
 } from "react-native";
 import { ProgressBar, ProgressBarStyles } from "./ProgressBar";
 import { ThemedText } from "../ThemedText";
@@ -33,6 +34,7 @@ import DoneSVG from "../../svg/done.svg";
 import AddSVG from "../../svg/add.svg";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "../ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type MealSummaryProps = {
   mealId: string;
@@ -69,8 +71,9 @@ export default function MealSummary({
 }: MealSummaryProps) {
   const [expanded, setExpanded] = React.useState(expandedByDefault);
   const [editing, setEditing] = React.useState(false);
+  let colorScheme = useColorScheme();
 
-  const meal = useSelector((state: RootState) => state.food.todaysMeals).find(
+  const meal = useSelector((state: RootState) => state.food.meals).find(
     (meal: Meal) => meal.mealId === mealId
   );
 
@@ -81,6 +84,11 @@ export default function MealSummary({
   React.useEffect(() => updateMealCategory(), [pickerCategory]);
 
   const dispatch = useDispatch();
+
+  let recipeServings = [];
+  for (let i = 0; i < 1000; i += 0.5) {
+    recipeServings.push(i);
+  }
 
   const deleteMeal = () => {
     if (!meal?.mealId) return;
@@ -102,21 +110,56 @@ export default function MealSummary({
     dispatch(updateMeal({ updatedMeal: { ...meal, summary: text } }));
   };
 
+  const updateRecipeYields = (value: number) => {
+    dispatch(
+      updateMeal({
+        updatedMeal: {
+          ...meal,
+          recipe: { title: meal.recipe.title, yields: value },
+        },
+      })
+    );
+  };
+
+  const updateRecipeTitle = (value: string) => {
+    dispatch(
+      updateMeal({
+        updatedMeal: {
+          ...meal,
+          recipe: { title: value, yields: meal.recipe.yields },
+        },
+      })
+    );
+  };
   return meal ? (
     <ThemedView
       style={{ ...styles.infoPanel, borderRadius: embedded ? 12 : 12 }}
     >
       <View style={styles.header}>
-        <ThemedText
-          type="subtitle"
-          onPress={() => setExpanded(!expanded)}
-        >
-          {capFirstLetter(meal.meal)}
-        </ThemedText>
+        {((meal.recipe && !editing) || !meal.recipe) && (
+          <ThemedText type="subtitle" onPress={() => setExpanded(!expanded)}>
+            {capFirstLetter(meal.recipe ? meal.recipe.title : meal.meal)}
+          </ThemedText>
+        )}
+        {meal.recipe && editing && (
+          <TextInput
+            placeholder="Name your recipe..."
+            style={styles.titleEdit}
+            onSubmitEditing={(event) =>
+              updateRecipeTitle(event.nativeEvent.text)
+            }
+          >
+            {meal.recipe.title}
+          </TextInput>
+        )}
         <View style={styles.row}>
           {editing ? (
             <TouchableOpacity onPress={() => setEditing(false)}>
-              <DoneSVG width={30} height={30} fill="Colors.themeColor" />
+              <DoneSVG
+                width={30}
+                height={30}
+                fill={colorScheme === "dark" ? "#ffffff" : Colors.themeColor}
+              />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -124,13 +167,21 @@ export default function MealSummary({
                 setEditing(true);
               }}
             >
-              <EditSVG width={30} height={25} />
+              <EditSVG
+                width={30}
+                height={25}
+                color={colorScheme === "dark" ? "#ffffff" : Colors.themeColor}
+              />
             </TouchableOpacity>
           )}
 
           {meal.isAdded && (
             <TouchableOpacity onPress={deleteMeal}>
-              <DeleteSVG width={30} height={30} fill="#C2473E" />
+              <DeleteSVG
+                width={30}
+                height={30}
+                fill={colorScheme === "dark" ? "#ffffff" : "#C2473E"}
+              />
             </TouchableOpacity>
           )}
 
@@ -141,7 +192,7 @@ export default function MealSummary({
           )}
         </View>
       </View>
-      {editing && (
+      {editing && meal.meal !== "Recipe" && (
         <View style={styles.categoryPickerContainer}>
           <Picker
             selectedValue={pickerCategory}
@@ -156,21 +207,53 @@ export default function MealSummary({
       )}
       <View>
         <View style={styles.macros}>
+          {meal.recipe && !editing && (
+            <ThemedText type="defaultSemiBold">
+              Makes {meal.recipe.yields} servings. Per serving:
+            </ThemedText>
+          )}
+          {meal.recipe && editing && (
+            <Picker
+              selectedValue={meal.recipe.yields}
+              onValueChange={(value) => updateRecipeYields(value)}
+              itemStyle={{ color: "white" }}
+            >
+              {recipeServings.map((i) => (
+                <Picker.Item value={i} label={i + " servings"} />
+              ))}
+            </Picker>
+          )}
           <ProgressBar
             macro={DisplayedMacroTypes.calories}
-            amount={getSummedMacros([meal]).calories}
+            amount={
+              meal.recipe
+                ? getRecipeSummedMacros(meal).calories
+                : getSummedMacros([meal]).calories
+            }
           />
           <ProgressBar
             macro={DisplayedMacroTypes.net_carbohydrates}
-            amount={getSummedMacros([meal]).net_carbohydrates}
+            amount={
+              meal.recipe
+                ? getRecipeSummedMacros(meal).net_carbohydrates
+                : getSummedMacros([meal]).net_carbohydrates
+            }
           />
           <ProgressBar
             macro={DisplayedMacroTypes.fat}
-            amount={getSummedMacros([meal]).fat}
+            amount={
+              meal.recipe
+                ? getRecipeSummedMacros(meal).fat
+                : getSummedMacros([meal]).fat
+            }
           />
           <ProgressBar
             macro={DisplayedMacroTypes.protein}
-            amount={getSummedMacros([meal]).protein}
+            amount={
+              meal.recipe
+                ? getRecipeSummedMacros(meal).protein
+                : getSummedMacros([meal]).protein
+            }
           />
         </View>
       </View>
@@ -182,10 +265,7 @@ export default function MealSummary({
           onChangeText={(text) => updateMealSummary(text)}
         ></TextInput>
       ) : (
-        <ThemedText
-          type="defaultSemiBold"
-          style={{ marginTop: 8 }}
-        >
+        <ThemedText type="defaultSemiBold" style={{ marginTop: 8 }}>
           {meal.summary}
         </ThemedText>
       )}
@@ -258,5 +338,10 @@ const styles = StyleSheet.create({
   categoryPickerBtn: {},
   summaryInputBox: {
     fontSize: 16,
+    color: "white",
+  },
+  titleEdit: {
+    color: "white",
+    fontSize: 22,
   },
 });

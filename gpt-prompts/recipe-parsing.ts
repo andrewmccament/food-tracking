@@ -6,10 +6,11 @@ If enough information is provided, attempt to parse the input into a Recipe in t
 
 {
   "followUpQuestion"?: string, // Only used if you do not have enough info to populate the other fields.
+  "meal": "Recipe", // always return this value
   "summary": string, // Example: "A tasty sandwich with arugula, honey mustard, ham and cheddar cheese."
   "motivation": string, // Example: "Well done! You did a great job incorporating green vegetables."
   "ingredients": Ingredient[],
-"yields": number, // ask if the user does not provide.  how many servings does this recipe create?
+"recipe": {"yields": number // ask if the user does not provide.  how many servings does this recipe create?, "title": string // a short title for the recipe}, 
 }
 
 Where Ingredient's structure is: 

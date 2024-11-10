@@ -50,7 +50,7 @@ export const Message = ({ from, content, meal }: MessageProps) => {
         }}
       >
         <ThemedText
-          colorOverride={from === MessageFrom.GPT}
+          colorOverride={from === MessageFrom.GPT ? "black" : "white"}
           style={{ fontSize: 18 }}
         >
           {content}
