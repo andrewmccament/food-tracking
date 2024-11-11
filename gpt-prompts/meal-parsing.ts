@@ -1,4 +1,5 @@
 export const MEAL_PARSING_PROMPT = `
+First of all, if a user sends recipes they've created, DO NOT add the ingredients for it without reducing the servings by the yield amount.
 Ensure that the provided serving amounts for each ingredient are accurately reflected in the JSON output format.
 
 If enough information is provided, attempt to parse the input into a Meal in the following JSON format: 

@@ -34,7 +34,6 @@ import DoneSVG from "../../svg/done.svg";
 import AddSVG from "../../svg/add.svg";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "../ThemedView";
-import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type MealSummaryProps = {
   mealId: string;
@@ -180,7 +179,7 @@ export default function MealSummary({
               <DeleteSVG
                 width={30}
                 height={30}
-                fill={colorScheme === "dark" ? "#ffffff" : "#C2473E"}
+                fill={colorScheme === "dark" ? "red" : "#C2473E"}
               />
             </TouchableOpacity>
           )}
@@ -192,7 +191,7 @@ export default function MealSummary({
           )}
         </View>
       </View>
-      {editing && meal.meal !== "Recipe" && (
+      {editing && !meal.recipe && (
         <View style={styles.categoryPickerContainer}>
           <Picker
             selectedValue={pickerCategory}
@@ -282,17 +281,29 @@ export default function MealSummary({
                 })
               }
             >
-              <View style={styles.row}>
-                <ThemedText type="defaultSemiBold">
-                  {capFirstLetter(ingredient.food_name)}
-                </ThemedText>
-                <ThemedText type="default">
-                  {` ${ingredient.serving.serving_description}`}
-                </ThemedText>
+              <View style={styles.header}>
+                <View style={styles.row}>
+                  <ThemedText type="defaultSemiBold">
+                    {capFirstLetter(ingredient.food_name)}
+                  </ThemedText>
+                  <ThemedText type="default">
+                    {` ${ingredient.serving.serving_description}`}
+                  </ThemedText>
+                </View>
+                <TouchableOpacity>
+                  <DeleteSVG
+                    width={30}
+                    height={30}
+                    fill={colorScheme === "dark" ? "red" : "#C2473E"}
+                  />
+                </TouchableOpacity>
               </View>
               <MacroBreakdown macros={ingredient.serving} />
             </TouchableOpacity>
           ))}
+          <TouchableOpacity style={styles.addIngredient}>
+            <AddSVG width={65} height={65} color={Colors.themeColor} />
+          </TouchableOpacity>
         </ScrollView>
       )}
     </ThemedView>
@@ -343,5 +354,10 @@ const styles = StyleSheet.create({
   titleEdit: {
     color: "white",
     fontSize: 22,
+  },
+  addIngredient: {
+    marginTop: 16,
+    width: "100%",
+    alignItems: "center",
   },
 });

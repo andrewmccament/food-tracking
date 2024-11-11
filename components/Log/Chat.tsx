@@ -14,6 +14,7 @@ import {
   parseMeal,
   parseMealRecipe,
   transcribeAudio,
+  utilizeRecipes,
 } from "@/services/open-ai";
 import { recordMeal } from "@/state/foodSlice";
 import { useSelector, useDispatch } from "react-redux";
@@ -23,6 +24,7 @@ import { ButtonStyle, ThemedButton } from "../ThemedButton";
 import SpeakSVG from "../../svg/speak.svg";
 import { Colors } from "@/constants/Colors";
 import { useLocalSearchParams, useNavigation } from "expo-router";
+import { RootState } from "@/state/store";
 
 export type ChatProps = {
   onMealRetrieval: (mealId: string) => void;
@@ -30,7 +32,9 @@ export type ChatProps = {
 
 export const Chat = ({ onMealRetrieval }: ChatProps) => {
   const { logMode } = useLocalSearchParams();
-
+  let recipes = useSelector((state: RootState) => state.food.meals).filter(
+    (meal: Meal) => meal?.isAdded && meal?.recipe
+  );
   const [messages, setMessages] = React.useState<Message[]>([]);
   const messagesRef = React.useRef<Message[]>();
   const [listening, setListening] = React.useState(false);
@@ -131,40 +135,62 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             .concat({ from: MessageFrom.GPT, contents: "..." });
         });
       }
-      const response =
-        logMode === "recipe"
-          ? await parseMealRecipe(transcription, messagesRef.current)
-          : await parseMeal(transcription, messagesRef.current);
+      const attemptUseRecipe = await utilizeRecipes(
+        transcription,
+        messagesRef.current,
+        recipes
+      );
+      console.log(attemptUseRecipe);
+      if (attemptUseRecipe.followUpQuestion) {
+        setMessages((previous) =>
+          previous.slice(0, -1).concat({
+            from: MessageFrom.GPT,
+            contents: response.followUpQuestion as string,
+          })
+        );
+      } else if (attemptUseRecipe.transformedInput) {
+        const response =
+          logMode === "recipe"
+            ? await parseMealRecipe(
+                attemptUseRecipe.transformedInput,
+                messagesRef.current,
+                recipes
+              )
+            : await parseMeal(
+                attemptUseRecipe.transformedInput,
+                messagesRef.current,
+                recipes
+              );
 
-      console.log(response);
-      if (!response?.error) {
-        if (response.meal) {
-          dispatch(recordMeal(response));
+        if (!response?.error) {
+          if (response.meal) {
+            dispatch(recordMeal(response));
 
-          setMeal(response);
-          onMealRetrieval(response.mealId);
-          setMessages((previous) =>
-            previous.slice(0, -1).concat({
-              from: MessageFrom.GPT,
-              contents: response.motivation,
-              meal: response,
-            })
-          );
+            setMeal(response);
+            onMealRetrieval(response.mealId);
+            setMessages((previous) =>
+              previous.slice(0, -1).concat({
+                from: MessageFrom.GPT,
+                contents: response.motivation,
+                meal: response,
+              })
+            );
+          } else {
+            setMessages((previous) =>
+              previous.slice(0, -1).concat({
+                from: MessageFrom.GPT,
+                contents: response.followUpQuestion as string,
+              })
+            );
+          }
         } else {
           setMessages((previous) =>
             previous.slice(0, -1).concat({
               from: MessageFrom.GPT,
-              contents: response.followUpQuestion as string,
+              contents: `I'm sorry, I didn't quite get that.  Can you try again please?`,
             })
           );
         }
-      } else {
-        setMessages((previous) =>
-          previous.slice(0, -1).concat({
-            from: MessageFrom.GPT,
-            contents: `I'm sorry, I didn't quite get that.  Can you try again please?`,
-          })
-        );
       }
     }
   };
