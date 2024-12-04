@@ -85,14 +85,13 @@ export const utilizeRecipes = async (
         },
       }
     );
-    const date = new Date();
     try {
       console.log(response);
-      const response = JSON.parse(response.data.choices[0].message.content) as {
+      const res = JSON.parse(response.data.choices[0].message.content) as {
         followUpQuestion?: string;
         transformedInput?: string;
       };
-      return response;
+      return res;
     } catch (err) {
       return { error: `${err}` };
     }
