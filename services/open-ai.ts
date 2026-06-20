@@ -27,6 +27,8 @@ export const transcribeAudio = async (audioUri: string) => {
         },
       }
     );
+    console.log(response);
+
     return response.data.text;
   } catch (err) {
     console.error("Transcription failed: ", err);
@@ -199,6 +201,8 @@ export const parseMealRecipe = async (
         },
       }
     );
+    console.log(response);
+
     const date = new Date();
     try {
       const meal = JSON.parse(response.data.choices[0].message.content) as Meal;

@@ -140,7 +140,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
         messagesRef.current,
         recipes
       );
-      console.log(attemptUseRecipe);
+      console.log("foobar", attemptUseRecipe);
       if (attemptUseRecipe.followUpQuestion) {
         setMessages((previous) =>
           previous.slice(0, -1).concat({
