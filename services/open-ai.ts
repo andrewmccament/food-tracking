@@ -7,6 +7,20 @@ import { Meal } from "@/types/openAi.types";
 import { RECIPE_PARSING_PROMPT } from "@/gpt-prompts/recipe-parsing";
 import { RECIPE_UTILIZATION_PROMPT } from "@/gpt-prompts/recipe-utilization";
 
+const CHAT_MODEL = "gpt-4.1-mini";
+
+const getOpenAIErrorMessage = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    return (
+      error.response?.data?.error?.message ??
+      error.response?.data?.message ??
+      error.message
+    );
+  }
+
+  return error instanceof Error ? error.message : String(error);
+};
+
 export const transcribeAudio = async (audioUri: string) => {
   const formData = new FormData();
   formData.append("file", {
@@ -17,21 +31,28 @@ export const transcribeAudio = async (audioUri: string) => {
   formData.append("model", "whisper-1");
 
   try {
-    const response = await axios.post(
+    const response = await fetch(
       "https://api.openai.com/v1/audio/transcriptions",
-      formData,
       {
+        method: "POST",
         headers: {
           Authorization: AUTHORIZATION,
-          "Content-Type": "multipart/form-data",
         },
+        body: formData,
       }
     );
-    console.log(response);
 
-    return response.data.text;
+    const responseBody = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        responseBody?.error?.message ??
+          `Transcription request failed with status ${response.status}`
+      );
+    }
+
+    return responseBody.text as string;
   } catch (err) {
-    console.error("Transcription failed: ", err);
+    console.error("Transcription failed:", getOpenAIErrorMessage(err));
     return null;
   }
 };
@@ -40,6 +61,7 @@ export type ParseMealResponse = Promise<Meal | { error: string }>;
 export type UtilizeRecipeResponse = Promise<{
   followUpQuestion?: string;
   transformedInput?: string;
+  error?: string;
 }>;
 
 export const utilizeRecipes = async (
@@ -55,7 +77,7 @@ export const utilizeRecipes = async (
     },
     ...pastMessages.map((message) => {
       return {
-        role: message.from === MessageFrom.GPT ? "system" : "user",
+        role: message.from === MessageFrom.GPT ? "assistant" : "user",
         content: message.contents,
       };
     }),
@@ -77,8 +99,9 @@ export const utilizeRecipes = async (
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-3.5-turbo",
+        model: CHAT_MODEL,
         messages: messages,
+        response_format: { type: "json_object" },
       },
       {
         headers: {
@@ -88,17 +111,16 @@ export const utilizeRecipes = async (
       }
     );
     try {
-      console.log(response);
       const res = JSON.parse(response.data.choices[0].message.content) as {
         followUpQuestion?: string;
         transformedInput?: string;
       };
       return res;
     } catch (err) {
-      return { error: `${err}` };
+      return { error: getOpenAIErrorMessage(err) };
     }
   } catch (err) {
-    return { error: `${err}` };
+    return { error: getOpenAIErrorMessage(err) };
   }
 };
 
@@ -115,7 +137,7 @@ export const parseMeal = async (
     },
     ...pastMessages.map((message) => {
       return {
-        role: message.from === MessageFrom.GPT ? "system" : "user",
+        role: message.from === MessageFrom.GPT ? "assistant" : "user",
         content: message.contents,
       };
     }),
@@ -137,8 +159,9 @@ export const parseMeal = async (
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-3.5-turbo",
+        model: CHAT_MODEL,
         messages: messages,
+        response_format: { type: "json_object" },
       },
       {
         headers: {
@@ -159,10 +182,10 @@ export const parseMeal = async (
         date: `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`,
       };
     } catch (err) {
-      return { error: `${err}` };
+      return { error: getOpenAIErrorMessage(err) };
     }
   } catch (err) {
-    return { error: `${err}` };
+    return { error: getOpenAIErrorMessage(err) };
   }
 };
 
@@ -177,7 +200,7 @@ export const parseMealRecipe = async (
     },
     ...pastMessages.map((message) => {
       return {
-        role: message.from === MessageFrom.GPT ? "system" : "user",
+        role: message.from === MessageFrom.GPT ? "assistant" : "user",
         content: message.contents,
       };
     }),
@@ -191,8 +214,9 @@ export const parseMealRecipe = async (
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-3.5-turbo",
+        model: CHAT_MODEL,
         messages: messages,
+        response_format: { type: "json_object" },
       },
       {
         headers: {
@@ -201,8 +225,6 @@ export const parseMealRecipe = async (
         },
       }
     );
-    console.log(response);
-
     const date = new Date();
     try {
       const meal = JSON.parse(response.data.choices[0].message.content) as Meal;
@@ -215,9 +237,9 @@ export const parseMealRecipe = async (
         date: `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`,
       };
     } catch (err) {
-      return { error: `${err}` };
+      return { error: getOpenAIErrorMessage(err) };
     }
   } catch (err) {
-    return { error: `${err}` };
+    return { error: getOpenAIErrorMessage(err) };
   }
 };

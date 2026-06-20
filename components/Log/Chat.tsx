@@ -73,7 +73,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
       if (permissionResponse?.status !== "granted") {
         await requestPermission();
       }
-      Audio.setAudioModeAsync({
+      await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
@@ -92,7 +92,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
 
   const stopLogging = async (transcribe = true) => {
     setListening(false);
-    Audio.setAudioModeAsync({
+    await Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
     });
 
@@ -107,7 +107,17 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
       const uri = recording.current.getURI();
       if (uri) {
         const transcription = await transcribeAudio(uri);
-        attemptParseMeal(transcription);
+        if (transcription) {
+          attemptParseMeal(transcription);
+        } else {
+          setMessages((previous) =>
+            previous.slice(0, -1).concat({
+              from: MessageFrom.GPT,
+              contents:
+                "I couldn't transcribe that recording. Check the Metro log for the OpenAI error.",
+            })
+          );
+        }
       } else {
         console.error("NULL URI");
       }
@@ -135,17 +145,31 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             .concat({ from: MessageFrom.GPT, contents: "..." });
         });
       }
-      const attemptUseRecipe = await utilizeRecipes(
-        transcription,
-        messagesRef.current,
-        recipes
-      );
-      console.log("foobar", attemptUseRecipe);
+      const attemptUseRecipe =
+        recipes.length > 0
+          ? await utilizeRecipes(
+              transcription,
+              messagesRef.current ?? [],
+              recipes
+            )
+          : { transformedInput: transcription };
+
+      if (attemptUseRecipe.error) {
+        console.error("Recipe matching failed:", attemptUseRecipe.error);
+        setMessages((previous) =>
+          previous.slice(0, -1).concat({
+            from: MessageFrom.GPT,
+            contents: `OpenAI request failed: ${attemptUseRecipe.error}`,
+          })
+        );
+        return;
+      }
+
       if (attemptUseRecipe.followUpQuestion) {
         setMessages((previous) =>
           previous.slice(0, -1).concat({
             from: MessageFrom.GPT,
-            contents: response.followUpQuestion as string,
+            contents: attemptUseRecipe.followUpQuestion as string,
           })
         );
       } else if (attemptUseRecipe.transformedInput) {
@@ -153,16 +177,15 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
           logMode === "recipe"
             ? await parseMealRecipe(
                 attemptUseRecipe.transformedInput,
-                messagesRef.current,
-                recipes
+                messagesRef.current ?? []
               )
             : await parseMeal(
                 attemptUseRecipe.transformedInput,
-                messagesRef.current,
+                messagesRef.current ?? [],
                 recipes
               );
 
-        if (!response?.error) {
+        if (!("error" in response)) {
           if (response.meal) {
             dispatch(recordMeal(response));
 
@@ -184,10 +207,11 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             );
           }
         } else {
+          console.error("Meal parsing failed:", response.error);
           setMessages((previous) =>
             previous.slice(0, -1).concat({
               from: MessageFrom.GPT,
-              contents: `I'm sorry, I didn't quite get that.  Can you try again please?`,
+              contents: `OpenAI request failed: ${response.error}`,
             })
           );
         }
