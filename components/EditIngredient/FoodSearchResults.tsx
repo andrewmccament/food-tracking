@@ -91,6 +91,7 @@ export const FoodSearchResults = ({
                 {servingPreview &&
                   DisplayedMacroIterator.map((macro) => (
                     <ProgressBar
+                      key={macro}
                       macro={macro}
                       amount={parseFloat(servingPreview[macro])}
                     />
