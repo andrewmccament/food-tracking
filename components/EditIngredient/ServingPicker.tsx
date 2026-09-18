@@ -36,12 +36,12 @@ export const ServingPicker = ({
 
   const changeAmount = (newAmount: number) => {
     setAmount(newAmount);
-    onAmountChange(parseFloat(newAmount));
+    onAmountChange(newAmount);
   };
 
   const changeIndex = (newIndex: number) => {
     selectUnitIndex(newIndex);
-    onServingIndexChange(parseFloat(newIndex));
+    onServingIndexChange(newIndex);
   };
 
   React.useEffect(() => {

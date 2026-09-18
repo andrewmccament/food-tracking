@@ -15,7 +15,7 @@ export const IngredientSearch = ({
   initialSearch,
   onSelectIngredient,
 }: IngredientSearchProps) => {
-  const inputRef = React.useRef(null);
+  const inputRef = React.useRef<TextInput>(null);
   const [searchResults, setSearchResults] =
     React.useState<FoodSearchV1Response>();
 

@@ -89,9 +89,11 @@ export const ManualIngredientEditor = ({
             <ServingPicker
               possibleServings={[ingredient?.serving]}
               onAmountChange={(val: number) => {
+                const serving = scaleServing(ingredient.serving, val);
+                if (!serving) return;
                 onUpdateIngredient({
                   ...ingredient,
-                  serving: scaleServing(ingredient.serving, val),
+                  serving,
                 });
               }}
               onServingIndexChange={() => {}}

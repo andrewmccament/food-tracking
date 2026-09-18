@@ -1,13 +1,12 @@
 import React from "react";
 import { RootState } from "@/state/store";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import {
   View,
   StyleSheet,
   useWindowDimensions,
   KeyboardAvoidingView,
   TouchableOpacity,
-  Text,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { TabView, SceneMap } from "react-native-tab-view";
@@ -29,17 +28,20 @@ export default function EditIngredientScreen() {
   ]);
 
   const { mealId, ingredient } = useLocalSearchParams();
-  if (!(mealId && ingredient)) return;
-  const ingredientIndex = parseInt(ingredient[0]);
+  const mealIdParam = Array.isArray(mealId) ? mealId[0] : mealId;
+  const ingredientParam = Array.isArray(ingredient) ? ingredient[0] : ingredient;
+  const ingredientIndex = parseInt(ingredientParam ?? "", 10);
   const meal = useSelector((state: RootState) => state.food.meals).find(
-    (meal) => meal.mealId === mealId
+    (meal) => meal.mealId === mealIdParam
   );
   const thisIngredient = meal?.ingredients[ingredientIndex];
+
+  if (!mealIdParam || Number.isNaN(ingredientIndex)) return null;
 
   const pushUpdateIngredient = (ingredient: Ingredient) => {
     dispatch(
       updateIngredient({
-        mealId: mealId,
+        mealId: mealIdParam,
         ingredientIndex: ingredientIndex,
         ingredient: ingredient,
       })
@@ -76,12 +78,10 @@ export default function EditIngredientScreen() {
     ManualEdit: ManualEdit,
   });
 
-  const renderTabBar = (props) => {
-    const inputRange = props.navigationState.routes.map((x, i) => i);
-
+  const renderTabBar = (props: any) => {
     return (
       <View style={styles.tabBar}>
-        {props.navigationState.routes.map((route, i) => {
+        {props.navigationState.routes.map((route: { title: string }, i: number) => {
           return (
             <TouchableOpacity
               style={{

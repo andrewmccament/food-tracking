@@ -7,8 +7,20 @@ import axios from "axios";
 const FATSECRET_CLIENT_ID = process.env.EXPO_PUBLIC_FATSECRET_CLIENT_ID;
 const FATSECRET_CLIENT_SECRET = process.env.EXPO_PUBLIC_FATSECRET_CLIENT_SECRET;
 
+const getFatSecretErrorMessage = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    return error.response?.data ?? error.message;
+  }
+
+  return error instanceof Error ? error.message : String(error);
+};
+
 // Function to get access token
 const getAccessToken = async (): Promise<string> => {
+  if (!FATSECRET_CLIENT_ID || !FATSECRET_CLIENT_SECRET) {
+    throw new Error("FatSecret credentials are not configured.");
+  }
+
   try {
     const response = await axios.post(
       "https://oauth.fatsecret.com/connect/token",
@@ -31,7 +43,7 @@ const getAccessToken = async (): Promise<string> => {
   } catch (error) {
     console.error(
       "Failed to obtain access token:",
-      error.response?.data || error.message
+      getFatSecretErrorMessage(error)
     );
     throw error;
   }

@@ -17,7 +17,7 @@ export default function LoggingScreen() {
     });
   }, [logMode, navigation]);
 
-  const mealId = React.useRef<string>();
+  const mealId = React.useRef<string | undefined>(undefined);
   const [mealIdChanged, setMealIdChanged] = React.useState<string>();
   const userAddedMeal = React.useRef(false);
   const dispatch = useDispatch();
@@ -29,13 +29,15 @@ export default function LoggingScreen() {
           mealId.current &&
           !meals.find((meal) => meal.mealId === mealId.current)?.isAdded
         ) {
+          const unsavedMealId = mealId.current;
+          if (!unsavedMealId) return;
           Alert.alert("Did you want to save the meal or discard?", "", [
             {
               text: "Discard",
               onPress: () => {},
               style: "cancel",
             },
-            { text: "Save", onPress: () => dispatch(logMeal(mealId.current)) },
+            { text: "Save", onPress: () => dispatch(logMeal(unsavedMealId)) },
           ]);
         }
       }, 1000);

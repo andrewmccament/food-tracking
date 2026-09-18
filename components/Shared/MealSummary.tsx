@@ -52,7 +52,7 @@ export const MacroBreakdown = ({ macros, textStyle }: MacroBreakdownProps) => {
           <ProgressBar
             style={ProgressBarStyles.REVERSED}
             macro={macro}
-            amount={macros[macro]}
+            amount={parseFloat(String(macros[macro] ?? 0))}
             textStyle={textStyle}
           />
         </View>
@@ -102,14 +102,17 @@ export default function MealSummary({
   };
 
   const updateMealCategory = () => {
+    if (!meal || !pickerCategory) return;
     dispatch(updateMeal({ updatedMeal: { ...meal, meal: pickerCategory } }));
   };
 
   const updateMealSummary = (text: string) => {
+    if (!meal) return;
     dispatch(updateMeal({ updatedMeal: { ...meal, summary: text } }));
   };
 
   const updateRecipeYields = (value: number) => {
+    if (!meal?.recipe) return;
     dispatch(
       updateMeal({
         updatedMeal: {
@@ -121,6 +124,7 @@ export default function MealSummary({
   };
 
   const updateRecipeTitle = (value: string) => {
+    if (!meal?.recipe) return;
     dispatch(
       updateMeal({
         updatedMeal: {
@@ -184,8 +188,8 @@ export default function MealSummary({
             </TouchableOpacity>
           )}
 
-          {allowAdding && (
-            <TouchableOpacity onPress={() => onAdd()}>
+          {allowAdding && onAdd && (
+            <TouchableOpacity onPress={onAdd}>
               <AddSVG width={30} height={30} color={Colors.themeColor} />
             </TouchableOpacity>
           )}
@@ -334,6 +338,9 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
+  },
+  macros: {
     gap: 4,
   },
   infoPanel: {

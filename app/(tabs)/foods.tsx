@@ -1,13 +1,12 @@
 import MealSummary from "@/components/Shared/MealSummary";
-import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
+import { RootState } from "@/state/store";
 import { Meal } from "@/types/openAi.types";
 import { router } from "expo-router";
 import React from "react";
 import {
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -19,7 +18,7 @@ export default function MyFoodsScreen() {
   let meals = useSelector((state: RootState) => state.food.meals)
     .filter((meal: Meal) => meal?.isAdded && meal?.recipe)
     .sort((a: Meal, b: Meal) =>
-      a?.recipe?.title?.localeCompare(b?.recipe?.title)
+      (a.recipe?.title ?? "").localeCompare(b.recipe?.title ?? "")
     );
   return (
     <View style={styles.container}>

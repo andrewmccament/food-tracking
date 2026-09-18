@@ -7,6 +7,16 @@ import {
   Serving,
 } from "@/types/openAi.types";
 
+const displayedMacroKeys: DisplayedMacroTypes[] = [
+  DisplayedMacroTypes.calories,
+  DisplayedMacroTypes.carbohydrate,
+  DisplayedMacroTypes.fiber,
+  DisplayedMacroTypes.net_carbohydrates,
+  DisplayedMacroTypes.protein,
+  DisplayedMacroTypes.fat,
+  DisplayedMacroTypes.sugar,
+];
+
 export const getSummedMacros = (meals: Meal[]) => {
   let totals: DisplayedMacros = {
     calories: 0,
@@ -18,16 +28,14 @@ export const getSummedMacros = (meals: Meal[]) => {
     sugar: 0,
   };
 
-  const keys = Object.keys(totals);
-
-  for (let key of keys) {
+  for (let key of displayedMacroKeys) {
     for (let meal of meals) {
       for (let ingredient of meal.ingredients) {
-        totals[key] += parseInt(ingredient.serving[key]);
+        totals[key] += parseInt(String(ingredient.serving[key] ?? 0));
       }
     }
   }
-  for (let key of keys) {
+  for (let key of displayedMacroKeys) {
     totals[key] = Math.round(totals[key]);
   }
   return totals;
@@ -44,14 +52,14 @@ export const getRecipeSummedMacros = (meal: Meal) => {
     sugar: 0,
   };
 
-  const keys = Object.keys(totals);
+  const yields = meal.recipe?.yields ?? 1;
 
-  for (let key of keys) {
+  for (let key of displayedMacroKeys) {
     for (let ingredient of meal.ingredients) {
-      totals[key] += parseInt(ingredient.serving[key]) / meal.recipe?.yields;
+      totals[key] += parseInt(String(ingredient.serving[key] ?? 0)) / yields;
     }
   }
-  for (let key of keys) {
+  for (let key of displayedMacroKeys) {
     totals[key] = Math.round(totals[key]);
   }
   return totals;

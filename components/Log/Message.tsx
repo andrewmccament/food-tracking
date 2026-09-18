@@ -29,6 +29,7 @@ export const Message = ({ from, content, meal }: MessageProps) => {
   const dispatch = useDispatch();
 
   const addMeal = () => {
+    if (!meal) return;
     dispatch(logMeal(meal.mealId));
     router.back();
   };

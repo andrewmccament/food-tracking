@@ -55,6 +55,7 @@ export const transcribeAudio = async (audioUri: string) => {
 };
 
 export type ParseMealResponse = Promise<Meal | { error: string }>;
+type ParsedMealResponse = Meal & { error?: string };
 export type UtilizeRecipeResponse = Promise<{
   followUpQuestion?: string;
   transformedInput?: string;
@@ -169,7 +170,9 @@ export const parseMeal = async (
     );
     const date = new Date();
     try {
-      const meal = JSON.parse(response.data.choices[0].message.content) as Meal;
+      const meal = JSON.parse(
+        response.data.choices[0].message.content
+      ) as ParsedMealResponse;
       if (meal.error) {
         throw new Error("Tried to record an invalid meal");
       }
@@ -224,7 +227,9 @@ export const parseMealRecipe = async (
     );
     const date = new Date();
     try {
-      const meal = JSON.parse(response.data.choices[0].message.content) as Meal;
+      const meal = JSON.parse(
+        response.data.choices[0].message.content
+      ) as ParsedMealResponse;
       if (meal.error) {
         throw new Error("Tried to record an invalid meal");
       }

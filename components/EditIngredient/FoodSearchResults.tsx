@@ -54,17 +54,21 @@ export const FoodSearchResults = ({
     const serving =
       expandedFoodDetails?.food.servings.serving[selectedUnitIndex];
     if (serving) {
-      setServingPreview(scaleServing(serving, parseFloat(amount)));
+      const preview = scaleServing(serving, amount);
+      if (preview) {
+        setServingPreview(preview);
+      }
     }
   };
 
   const chooseFood = () => {
+    if (!expandedFoodDetails || !servingPreview) return;
     const convertedFood = {
-      food_name: expandedFoodDetails?.food.food_name,
-      food_type: expandedFoodDetails?.food.food_type,
-      food_url: expandedFoodDetails?.food.food_url,
+      food_name: expandedFoodDetails.food.food_name,
+      food_type: expandedFoodDetails.food.food_type,
+      food_url: expandedFoodDetails.food.food_url,
       serving: servingPreview,
-    } as Ingredient;
+    };
     onFoodSelected(convertedFood);
   };
 
@@ -93,7 +97,7 @@ export const FoodSearchResults = ({
                     <ProgressBar
                       key={macro}
                       macro={macro}
-                      amount={parseFloat(servingPreview[macro])}
+                      amount={parseFloat(String(servingPreview[macro] ?? 0))}
                     />
                   ))}
               </View>
