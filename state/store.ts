@@ -12,12 +12,16 @@ const migrations = {
     ...state,
     userData: resetDefaultUserGoals(state?.userData),
   }),
+  2: (state: any) => ({
+    ...state,
+    userData: resetDefaultUserGoals(state?.userData),
+  }),
 };
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  version: 1,
+  version: 2,
   whitelist: ["userData", "food"],
   migrate: createMigrate(migrations, { debug: false }),
 };

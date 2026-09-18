@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, Alert, Keyboard } from "react-native";
 import MealSummary from "@/components/Shared/MealSummary";
 import { useDispatch, useSelector } from "react-redux";
 import { logMeal } from "@/state/foodSlice";
@@ -24,6 +24,7 @@ export default function LoggingScreen() {
   const meals = useSelector((state: RootState) => state.food.meals);
   React.useEffect(() => {
     return () => {
+      Keyboard.dismiss();
       setTimeout(() => {
         if (
           mealId.current &&

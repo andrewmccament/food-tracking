@@ -1,29 +1,21 @@
 import React from "react";
 import {
-  Image,
   StyleSheet,
-  Platform,
   ScrollView,
-  Button,
   View,
-  Text,
-  KeyboardAvoidingView,
   TouchableOpacity,
 } from "react-native";
 
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { router } from "expo-router";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { getSummedMacros, sortMealsByCategory } from "@/helpers/food-utils";
 import MealSummary from "@/components/Shared/MealSummary";
 import { ProgressBar } from "@/components/Shared/ProgressBar";
 import { DisplayedMacroTypes, Meal } from "@/types/openAi.types";
-import { ThemedButton } from "@/components/ThemedButton";
 import AddSVG from "../../svg/log.svg";
 import { Colors } from "@/constants/Colors";
-import { LinearGradient, RadialGradient } from "react-native-gradients";
+import { LinearGradient } from "react-native-gradients";
 
 export default function TodayScreen() {
   const date = new Date();
@@ -37,11 +29,7 @@ export default function TodayScreen() {
   const todayMacros = getSummedMacros(meals);
 
   return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      keyboardVerticalOffset={90}
-      style={styles.todayContainer}
-    >
+    <View style={styles.todayContainer}>
       <View
         style={{
           position: "absolute",
@@ -108,7 +96,7 @@ export default function TodayScreen() {
           />
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -118,7 +106,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "black",
     gap: 12,
-    height: "200%",
     paddingBottom: 12,
   },
   mealsListContainer: {
