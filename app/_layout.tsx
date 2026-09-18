@@ -53,6 +53,10 @@ export default function RootLayout() {
                 ...headerStyle,
               }}
             />
+            <Stack.Screen
+              name="settings/goals"
+              options={{ headerShown: true, title: "Goals", ...headerStyle }}
+            />
           </Stack>
         </PersistGate>
       </Provider>

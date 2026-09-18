@@ -4,7 +4,19 @@ import { DisplayedMacros } from "@/types/openAi.types";
 
 export interface userDataState {
   goals: DisplayedMacros;
+  goalCalculationInputs: GoalCalculationInputs;
 }
+
+// These inputs are intentionally separate from the manually editable goals.
+// A future calculator can use them to suggest goals without overwriting a
+// user's choices unless they explicitly accept the suggestions.
+export type GoalCalculationInputs = {
+  sex?: "male" | "female" | "unspecified";
+  heightInches?: number;
+  weightLbs?: number;
+  targetWeightLbs?: number;
+  weeklyWeightChangeLbs?: number;
+};
 
 export const defaultUserGoals: DisplayedMacros = {
   calories: 1900,
@@ -18,6 +30,9 @@ export const defaultUserGoals: DisplayedMacros = {
 
 const initialState: userDataState = {
   goals: defaultUserGoals,
+  goalCalculationInputs: {
+    sex: "unspecified",
+  },
 };
 
 export const resetDefaultUserGoals = (state?: Partial<userDataState>) => ({
