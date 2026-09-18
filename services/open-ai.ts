@@ -2,6 +2,7 @@ import axios from "axios";
 import { MEAL_PARSING_PROMPT } from "../gpt-prompts/meal-parsing";
 const AUTHORIZATION = `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`;
 import * as Crypto from "expo-crypto";
+import { File } from "expo-file-system";
 import { Message, MessageFrom } from "@/components/Log/Message";
 import { Meal } from "@/types/openAi.types";
 import { RECIPE_PARSING_PROMPT } from "@/gpt-prompts/recipe-parsing";
@@ -23,11 +24,7 @@ const getOpenAIErrorMessage = (error: unknown) => {
 
 export const transcribeAudio = async (audioUri: string) => {
   const formData = new FormData();
-  formData.append("file", {
-    uri: audioUri,
-    name: "recording.m4a",
-    type: "audio/m4a",
-  } as any);
+  formData.append("file", new File(audioUri), "recording.m4a");
   formData.append("model", "whisper-1");
 
   try {

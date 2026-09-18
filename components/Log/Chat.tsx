@@ -8,8 +8,14 @@ import {
   TextInput,
   KeyboardAvoidingView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import { Audio } from "expo-av";
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+} from "expo-audio";
 import {
   parseMeal,
   parseMealRecipe,
@@ -36,91 +42,92 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
     (meal: Meal) => meal?.isAdded && meal?.recipe
   );
   const [messages, setMessages] = React.useState<Message[]>([]);
-  const messagesRef = React.useRef<Message[]>();
+  const messagesRef = React.useRef<Message[]>([]);
   const [listening, setListening] = React.useState(false);
-  const [permissionResponse, requestPermission] = Audio.usePermissions();
-  const recording = React.useRef({} as Audio.Recording);
+  const recording = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const audioBusy = React.useRef(false);
+  const [audioPending, setAudioPending] = React.useState(false);
   const [transcription, setTranscription] = React.useState<string>();
   const [meal, setMeal] = React.useState<Meal>();
   const dispatch = useDispatch();
 
-  const scrollViewRef = React.useRef(null);
-  const inputRef = React.useRef(null);
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  const inputRef = React.useRef<TextInput>(null);
 
   React.useEffect(() => {
     // Scroll to the bottom when new messages are added
     scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
-  // start logging automatically when the chat component first mounts (after waiting a second)
-  React.useEffect(() => {
-    //setTimeout(() => startLogging(), 1000);
-
-    return () => {
-      if (recording.current) {
-        stopLogging(false);
-      }
-    };
-  }, []);
+  // useAudioRecorder releases the native recorder when the screen unmounts.
 
   React.useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
   const startLogging = async () => {
-    setListening(true);
+    if (audioBusy.current) return;
+    audioBusy.current = true;
+    setAudioPending(true);
     try {
-      if (permissionResponse?.status !== "granted") {
-        await requestPermission();
+      const permission = await AudioModule.requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert("Microphone access needed", "Allow microphone access in Settings, or type your meal below.");
+        return;
       }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
       });
-
-      const { recording: currentRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      recording.current = currentRecording;
+      await recording.prepareToRecordAsync();
+      recording.record();
+      setListening(true);
       setMessages((previous) =>
         previous.concat({ from: MessageFrom.USER, contents: "..." })
       );
     } catch (err) {
-      console.error(err);
+      setListening(false);
+      Alert.alert("Couldn't start recording", "Please try again or type your meal.");
+    } finally {
+      audioBusy.current = false;
+      setAudioPending(false);
     }
   };
 
   const stopLogging = async (transcribe = true) => {
-    setListening(false);
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-    });
-
+    if (audioBusy.current) return;
+    audioBusy.current = true;
+    setAudioPending(true);
     try {
-      await recording.current?.stopAndUnloadAsync();
-    } catch (err) {
-      console.info(`Failed to unload recording: ${err}`);
-      return;
-    }
+      await recording.stop();
+      setListening(false);
+      await setAudioModeAsync({ allowsRecording: false });
 
-    if (transcribe) {
-      const uri = recording.current.getURI();
-      if (uri) {
-        const transcription = await transcribeAudio(uri);
-        if (transcription) {
-          attemptParseMeal(transcription);
+      if (transcribe) {
+        const uri = recording.uri;
+        if (uri) {
+          const transcription = await transcribeAudio(uri);
+          if (transcription) {
+            await attemptParseMeal(transcription);
+          } else {
+            setMessages((previous) =>
+              previous.slice(0, -1).concat({
+                from: MessageFrom.GPT,
+                contents:
+                  "I couldn't transcribe that recording. Check the Metro log for the OpenAI error.",
+              })
+            );
+          }
         } else {
-          setMessages((previous) =>
-            previous.slice(0, -1).concat({
-              from: MessageFrom.GPT,
-              contents:
-                "I couldn't transcribe that recording. Check the Metro log for the OpenAI error.",
-            })
-          );
+          throw new Error("Recording has no URI");
         }
-      } else {
-        console.error("NULL URI");
       }
+    } catch {
+      Alert.alert("Couldn't finish recording", "Please try again or type your meal.");
+    } finally {
+      setListening(false);
+      audioBusy.current = false;
+      setAudioPending(false);
     }
   };
 
@@ -239,6 +246,8 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
       <View style={styles.chatRow}>
         <View style={styles.speakButton}>
           <TouchableOpacity
+            disabled={audioPending}
+            accessibilityLabel={listening ? "Stop recording" : "Record meal"}
             onPress={() => {
               listening ? stopLogging() : startLogging();
             }}

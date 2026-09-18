@@ -4,6 +4,23 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## Get started
 
+This project uses Expo SDK 57 (currently 57.0.24), React Native 0.86.3,
+and React 19.2.3. Use Node 20.19.4+ (20.x), 22.13.0+ (22.x), or 24.3.0+.
+Use an iOS Expo Go version supporting SDK 57. Restart Metro after upgrading:
+
+```bash
+npm run start -- --clear
+```
+
+Voice recording uses `expo-audio`. Native development builds must be rebuilt
+after this SDK upgrade; Expo Go already includes the native modules.
+
+To verify native bundles without loading local credentials:
+
+```bash
+EXPO_NO_DOTENV=1 npx expo export --platform ios --platform android --output-dir /tmp/food-tracking-export
+```
+
 1. Install dependencies
 
    ```bash

@@ -5,9 +5,10 @@ exports[`renders correctly 1`] = `
   style={
     [
       {
-        "color": "#11181C",
+        "color": "black",
       },
       {
+        "fontFamily": "arial",
         "fontSize": 16,
         "lineHeight": 24,
       },
@@ -20,5 +21,5 @@ exports[`renders correctly 1`] = `
   }
 >
   Snapshot test!
-</ThemedText>
+</Text>
 `;
