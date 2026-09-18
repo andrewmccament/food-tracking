@@ -10,9 +10,13 @@ import { RootState } from "@/state/store";
 export default function LoggingScreen() {
   const { logMode } = useLocalSearchParams();
   const navigation = useNavigation();
-  navigation.setOptions({
-    title: logMode === "recipe" ? "Save Recipe" : "Log Food",
-  });
+
+  React.useEffect(() => {
+    navigation.setOptions({
+      title: logMode === "recipe" ? "Save Recipe" : "Log Food",
+    });
+  }, [logMode, navigation]);
+
   const mealId = React.useRef<string>();
   const [mealIdChanged, setMealIdChanged] = React.useState<string>();
   const userAddedMeal = React.useRef(false);

@@ -29,7 +29,7 @@ import { Meal } from "@/types/openAi.types";
 import { ButtonStyle, ThemedButton } from "../ThemedButton";
 import SpeakSVG from "../../svg/speak.svg";
 import { Colors } from "@/constants/Colors";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { RootState } from "@/state/store";
 
 export type ChatProps = {
