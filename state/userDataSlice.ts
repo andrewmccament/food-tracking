@@ -1,32 +1,44 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { Serving, Meal } from "@/gpt-prompts/meal-parsing";
+import { DisplayedMacros } from "@/types/openAi.types";
 
 export interface userDataState {
-  goals: Serving;
+  goals: DisplayedMacros;
 }
 
-const initialState: userDataState = {
-  goals: {
-    calories: 1800,
-    carbohydrate: 30,
-    fiber: 20,
-    net_carbohydrates: 20,
-    protein: 160,
-    fat: 150,
-    sugar: 10,
-  },
+export const defaultUserGoals: DisplayedMacros = {
+  calories: 1900,
+  carbohydrate: 200,
+  fiber: 30,
+  net_carbohydrates: 170,
+  protein: 150,
+  fat: 65,
+  sugar: 50,
 };
+
+const initialState: userDataState = {
+  goals: defaultUserGoals,
+};
+
+export const resetDefaultUserGoals = (state?: Partial<userDataState>) => ({
+  ...state,
+  goals: defaultUserGoals,
+});
 
 export const userDataSlice = createSlice({
   name: "userData",
   initialState,
   reducers: {
-    logMeal: (state, action: PayloadAction<Meal>) => {},
+    setGoals: (state, action: PayloadAction<Partial<DisplayedMacros>>) => {
+      state.goals = {
+        ...state.goals,
+        ...action.payload,
+      };
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { logMeal } = userDataSlice.actions;
+export const { setGoals } = userDataSlice.actions;
 
 export default userDataSlice.reducer;

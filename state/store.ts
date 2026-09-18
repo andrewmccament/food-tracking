@@ -1,15 +1,25 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import foodSlice from "./foodSlice";
-import userDataSlice from "./userDataSlice";
+import userDataSlice, { resetDefaultUserGoals } from "./userDataSlice";
 import { persistStore, persistReducer } from "redux-persist";
+import { createMigrate } from "redux-persist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //AsyncStorage.clear();
 
+const migrations = {
+  1: (state: any) => ({
+    ...state,
+    userData: resetDefaultUserGoals(state?.userData),
+  }),
+};
+
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
+  version: 1,
   whitelist: ["userData", "food"],
+  migrate: createMigrate(migrations, { debug: false }),
 };
 
 const persistedReducer = persistReducer(
