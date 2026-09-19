@@ -36,6 +36,12 @@ export type ChatProps = {
    * while owning the meaning of the request (for example, food planning).
    */
   onSubmit?: (input: string, previousMessages: Message[]) => Promise<string>;
+  /** Lets a feature own the conversation state while reusing this chat's UI and composer. */
+  controlledMessages?: Message[];
+  onInput?: (input: string, previousMessages: Message[]) => Promise<void>;
+  recordingRequestId?: number;
+  /** Hide the default recorder when a screen presents tap-only choices. */
+  showVoiceControl?: boolean;
   placeholder?: string;
   renderBelowMessages?: () => React.ReactNode;
 };
@@ -43,6 +49,10 @@ export type ChatProps = {
 export const Chat = ({
   onMealRetrieval,
   onSubmit,
+  controlledMessages,
+  onInput,
+  recordingRequestId,
+  showVoiceControl = true,
   placeholder = "Type to AI...",
   renderBelowMessages,
 }: ChatProps) => {
@@ -72,13 +82,13 @@ export const Chat = ({
   React.useEffect(() => {
     // Scroll to the bottom when new messages are added
     scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
+  }, [controlledMessages ?? messages]);
 
   // useAudioRecorder releases the native recorder when the screen unmounts.
 
   React.useEffect(() => {
-    messagesRef.current = messages;
-  }, [messages]);
+    messagesRef.current = controlledMessages ?? messages;
+  }, [controlledMessages, messages]);
 
   const startLogging = async () => {
     const result = await startRecording();
@@ -92,6 +102,18 @@ export const Chat = ({
       Alert.alert("Couldn't start recording", "Please try again or type your meal.");
     }
   };
+
+  const lastRecordingRequestId = React.useRef(0);
+  React.useEffect(() => {
+    if (
+      !recordingRequestId ||
+      recordingRequestId === lastRecordingRequestId.current
+    ) {
+      return;
+    }
+    lastRecordingRequestId.current = recordingRequestId;
+    void startLogging();
+  }, [recordingRequestId]);
 
   const stopLogging = async () => {
     try {
@@ -120,6 +142,15 @@ export const Chat = ({
     voiceOrigin = true
   ) => {
     if (transcription) {
+      if (onInput) {
+        try {
+          await onInput(transcription, messagesRef.current);
+        } catch {
+          // Controlled callers own their visible error state.
+        }
+        return;
+      }
+
       setTranscription(transcription);
       if (voiceOrigin) {
         setMessages((previous) => {
@@ -245,7 +276,7 @@ export const Chat = ({
     >
       <ScrollView ref={scrollViewRef}>
         <View>
-          {messages.map((message, index) => (
+          {(controlledMessages ?? messages).map((message, index) => (
             <Message
               from={message.from}
               content={message.contents}
@@ -257,21 +288,23 @@ export const Chat = ({
         </View>
       </ScrollView>
       <View style={styles.chatRow}>
-        <View style={styles.speakButton}>
-          <TouchableOpacity
-            disabled={audioPending}
-            accessibilityLabel={isRecording ? "Stop recording" : "Record meal"}
-            onPress={() => {
-              isRecording ? stopLogging() : startLogging();
-            }}
-          >
-            <SpeakSVG
-              width={35}
-              height={35}
-              color={isRecording ? "red" : Colors.themeColor}
-            />
-          </TouchableOpacity>
-        </View>
+        {(showVoiceControl || isRecording) && (
+          <View style={styles.speakButton}>
+            <TouchableOpacity
+              disabled={audioPending}
+              accessibilityLabel={isRecording ? "Stop recording" : "Record meal"}
+              onPress={() => {
+                isRecording ? stopLogging() : startLogging();
+              }}
+            >
+              <SpeakSVG
+                width={35}
+                height={35}
+                color={isRecording ? "red" : Colors.themeColor}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
         <TextInput
           style={styles.input}
           placeholder={placeholder}

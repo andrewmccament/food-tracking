@@ -2,6 +2,7 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import foodSlice from "./foodSlice";
 import {
   defaultFocusedMetrics,
+  defaultGoalCalculationInputs,
   resetDefaultUserGoals,
 } from "./userDataSlice";
 import userDataSlice from "./userDataSlice";
@@ -27,12 +28,22 @@ const migrations = {
       focusedMetrics: state?.userData?.focusedMetrics ?? defaultFocusedMetrics,
     },
   }),
+  4: (state: any) => ({
+    ...state,
+    userData: {
+      ...state?.userData,
+      goalCalculationInputs: {
+        ...defaultGoalCalculationInputs,
+        ...state?.userData?.goalCalculationInputs,
+      },
+    },
+  }),
 };
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  version: 3,
+  version: 4,
   whitelist: ["userData", "food"],
   migrate: createMigrate(migrations, { debug: false }),
 };

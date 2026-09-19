@@ -14,6 +14,7 @@ export interface userDataState {
 // A future calculator can use them to suggest goals without overwriting a
 // user's choices unless they explicitly accept the suggestions.
 export type GoalCalculationInputs = {
+  overallGoal?: "weight_loss" | "maintenance" | "weight_gain";
   sex?: "male" | "female" | "unspecified";
   heightInches?: number;
   weightLbs?: number;
@@ -37,11 +38,14 @@ export const defaultFocusedMetrics: DisplayedMacroTypes[] = [
   DisplayedMacroTypes.net_carbohydrates,
 ];
 
+export const defaultGoalCalculationInputs: GoalCalculationInputs = {
+  sex: "unspecified",
+  overallGoal: "weight_loss",
+};
+
 const initialState: userDataState = {
   goals: defaultUserGoals,
-  goalCalculationInputs: {
-    sex: "unspecified",
-  },
+  goalCalculationInputs: defaultGoalCalculationInputs,
   focusedMetrics: defaultFocusedMetrics,
   dailySummary: null,
 };

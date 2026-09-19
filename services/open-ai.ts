@@ -9,8 +9,65 @@ import { RECIPE_PARSING_PROMPT } from "@/gpt-prompts/recipe-parsing";
 import { RECIPE_UTILIZATION_PROMPT } from "@/gpt-prompts/recipe-utilization";
 import { DAY_SUMMARY_PROMPT } from "@/gpt-prompts/day-summary";
 import { DisplayedMacros } from "@/types/openAi.types";
+import {
+  RecommendationLevel,
+  SuggestedMeal,
+  WizardAnswer,
+  WizardResponse,
+} from "@/config/planning-wizard";
+import { PLANNING_WIZARD_PROMPT } from "@/gpt-prompts/planning-wizard";
 
 const CHAT_MODEL = "gpt-4.1-mini";
+
+/**
+ * Development diagnostics for every OpenAI request. Deliberately accept only
+ * request bodies and response data: never pass or log request headers.
+ */
+const logOpenAIRequest = (operation: string, body: unknown) => {
+  console.info(`[openai:${operation}] request`, body);
+};
+
+const logOpenAIResponse = (
+  operation: string,
+  startedAt: number,
+  response: { status?: number; headers?: Record<string, unknown>; data?: unknown }
+) => {
+  console.info(`\n\n\n[openai:${operation}] response`, {
+    durationMs: Date.now() - startedAt,
+    status: response.status,
+    requestId: response.headers?.["x-request-id"],
+    body: response.data,
+  });
+};
+
+const logOpenAIFailure = (operation: string, startedAt: number, error: unknown) => {
+  console.error(`[openai:${operation}] failed`, {
+    durationMs: Date.now() - startedAt,
+    status: axios.isAxiosError(error) ? error.response?.status : undefined,
+    code: axios.isAxiosError(error) ? error.code : undefined,
+    message: getOpenAIErrorMessage(error),
+    body: axios.isAxiosError(error) ? error.response?.data : undefined,
+  });
+};
+
+const displayedMacroKeys: (keyof DisplayedMacros)[] = [
+  "calories",
+  "carbohydrate",
+  "fiber",
+  "net_carbohydrates",
+  "protein",
+  "fat",
+  "sugar",
+];
+
+const hasValidDisplayedMacros = (value: unknown): value is DisplayedMacros =>
+  typeof value === "object" &&
+  value !== null &&
+  displayedMacroKeys.every(
+    (key) =>
+      typeof (value as Record<string, unknown>)[key] === "number" &&
+      Number.isFinite((value as Record<string, number>)[key])
+  );
 
 const getOpenAIErrorMessage = (error: unknown) => {
   if (axios.isAxiosError(error)) {
@@ -25,9 +82,14 @@ const getOpenAIErrorMessage = (error: unknown) => {
 };
 
 export const transcribeAudio = async (audioUri: string) => {
+  const startedAt = Date.now();
   const formData = new FormData();
   formData.append("file", new File(audioUri), "recording.m4a");
   formData.append("model", "whisper-1");
+  logOpenAIRequest("transcription", {
+    model: "whisper-1",
+    audioUri,
+  });
 
   try {
     const response = await fetch(
@@ -42,6 +104,11 @@ export const transcribeAudio = async (audioUri: string) => {
     );
 
     const responseBody = await response.json();
+    console.info("[openai:transcription] response", {
+      durationMs: Date.now() - startedAt,
+      status: response.status,
+      body: responseBody,
+    });
     if (!response.ok) {
       throw new Error(
         responseBody?.error?.message ??
@@ -51,6 +118,7 @@ export const transcribeAudio = async (audioUri: string) => {
 
     return responseBody.text as string;
   } catch (err) {
+    logOpenAIFailure("transcription", startedAt, err);
     console.error("Transcription failed:", getOpenAIErrorMessage(err));
     return null;
   }
@@ -66,6 +134,18 @@ export const summarizeDay = async ({
   consumed: DisplayedMacros;
 }) => {
   const startedAt = Date.now();
+  const requestBody = {
+    model: CHAT_MODEL,
+    messages: [
+      { role: "system", content: DAY_SUMMARY_PROMPT },
+      {
+        role: "user",
+        content: JSON.stringify({ currentTime, goals, consumed }),
+      },
+    ],
+    response_format: { type: "json_object" },
+  };
+  logOpenAIRequest("day-summary", requestBody);
   console.info("[day-summary] request started", {
     currentTime,
     goals,
@@ -75,17 +155,7 @@ export const summarizeDay = async ({
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
-      {
-        model: CHAT_MODEL,
-        messages: [
-          { role: "system", content: DAY_SUMMARY_PROMPT },
-          {
-            role: "user",
-            content: JSON.stringify({ currentTime, goals, consumed }),
-          },
-        ],
-        response_format: { type: "json_object" },
-      },
+      requestBody,
       {
         headers: {
           Authorization: AUTHORIZATION,
@@ -94,6 +164,7 @@ export const summarizeDay = async ({
         timeout: 15_000,
       }
     );
+    logOpenAIResponse("day-summary", startedAt, response);
     const content = JSON.parse(response.data.choices[0].message.content) as {
       summary?: string;
     };
@@ -107,6 +178,7 @@ export const summarizeDay = async ({
     });
     return summary;
   } catch (err) {
+    logOpenAIFailure("day-summary", startedAt, err);
     console.error("[day-summary] request failed", {
       durationMs: Date.now() - startedAt,
       status: axios.isAxiosError(err) ? err.response?.status : undefined,
@@ -114,6 +186,123 @@ export const summarizeDay = async ({
       message: getOpenAIErrorMessage(err),
     });
     return null;
+  }
+};
+
+export const advancePlanningWizard = async (context: {
+  currentTime: string;
+  mode: "quick" | "balanced" | "deep";
+  overallGoal: "weight_loss" | "maintenance" | "weight_gain";
+  dailyGoals: DisplayedMacros;
+  consumedToday: DisplayedMacros;
+  remainingToday: DisplayedMacros;
+  answers: WizardAnswer[];
+  forceSuggestions: boolean;
+  recommendationLevel: RecommendationLevel;
+  selectedFormat?: Pick<
+    SuggestedMeal,
+    "title" | "description" | "planningInput"
+  >;
+  previousRecommendations: string[];
+  guardrails: {
+    questionBudget: number;
+    questionCount: number;
+    maxRecommendations: number;
+    allowedQuestionCategories: string[];
+    questionGuardrails: Record<
+      string,
+      { purpose: string; minOptions: number; maxOptions: number }
+    >;
+    mealFormats: string[];
+  };
+}): Promise<WizardResponse | { error: string }> => {
+  const startedAt = Date.now();
+  const requestBody = {
+    model: CHAT_MODEL,
+    messages: [
+      { role: "system", content: PLANNING_WIZARD_PROMPT },
+      { role: "user", content: JSON.stringify(context) },
+    ],
+    response_format: { type: "json_object" },
+  };
+  logOpenAIRequest("planning-wizard", requestBody);
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      requestBody,
+      {
+        headers: {
+          Authorization: AUTHORIZATION,
+          "Content-Type": "application/json",
+        },
+        timeout: 20_000,
+      }
+    );
+    logOpenAIResponse("planning-wizard", startedAt, response);
+    const rawContent = response.data.choices[0].message.content;
+    const parsed = JSON.parse(rawContent) as WizardResponse;
+    const questionGuardrail =
+      parsed.action === "question"
+        ? context.guardrails.questionGuardrails[parsed.question?.category]
+        : undefined;
+    if (
+      parsed.action === "question" &&
+      !context.forceSuggestions &&
+      context.guardrails.questionCount < context.guardrails.questionBudget &&
+      context.guardrails.allowedQuestionCategories.includes(parsed.question?.category) &&
+      !context.answers.some(
+        (answer) => answer.category === parsed.question?.category
+      ) &&
+      parsed.question?.options?.length &&
+      questionGuardrail &&
+      parsed.question.options.length >= questionGuardrail.minOptions &&
+      parsed.question.options.length <= questionGuardrail.maxOptions &&
+      parsed.question.options.every(
+        (option) =>
+          typeof option.id === "string" &&
+          typeof option.label === "string" &&
+          option.label.trim().length > 0
+      )
+    ) {
+      return parsed;
+    }
+    if (
+      parsed.action === "recommendations" &&
+      parsed.recommendations?.length > 0 &&
+      parsed.recommendations.length <= context.guardrails.maxRecommendations &&
+      parsed.recommendations.every(
+        (recommendation) =>
+          typeof recommendation.id === "string" &&
+          typeof recommendation.title === "string" &&
+          typeof recommendation.description === "string" &&
+          typeof recommendation.rationale === "string" &&
+          typeof recommendation.planningInput === "string" &&
+          hasValidDisplayedMacros(recommendation.estimatedMacros)
+      ) &&
+      (context.recommendationLevel !== "format" ||
+        parsed.recommendations.every((recommendation) =>
+          typeof recommendation.title === "string" &&
+          context.guardrails.mealFormats.includes(
+            recommendation.title.trim()
+          )
+        ))
+    ) {
+      return parsed;
+    }
+    console.warn("[openai:planning-wizard] response rejected", {
+      rawContent,
+      parsed,
+      forceSuggestions: context.forceSuggestions,
+      recommendationLevel: context.recommendationLevel,
+      recommendationCount:
+        parsed.action === "recommendations" ? parsed.recommendations?.length : undefined,
+      expectedRecommendationCount: context.guardrails.maxRecommendations,
+      allowedMealFormats: context.guardrails.mealFormats,
+    });
+    return { error: "The planner returned an incomplete response. Please try again." };
+  } catch (err) {
+    logOpenAIFailure("planning-wizard", startedAt, err);
+    return { error: getOpenAIErrorMessage(err) };
   }
 };
 
@@ -130,7 +319,6 @@ export const utilizeRecipes = async (
   pastMessages: Message[],
   recipes: Meal[]
 ): UtilizeRecipeResponse => {
-  console.log(JSON.stringify(recipes));
   const messages = [
     {
       role: "system",
@@ -155,15 +343,18 @@ export const utilizeRecipes = async (
       content: input,
     },
   ];
+  const startedAt = Date.now();
+  const requestBody = {
+    model: CHAT_MODEL,
+    messages,
+    response_format: { type: "json_object" },
+  };
+  logOpenAIRequest("recipe-utilization", requestBody);
 
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
-      {
-        model: CHAT_MODEL,
-        messages: messages,
-        response_format: { type: "json_object" },
-      },
+      requestBody,
       {
         headers: {
           Authorization: AUTHORIZATION,
@@ -171,6 +362,7 @@ export const utilizeRecipes = async (
         },
       }
     );
+    logOpenAIResponse("recipe-utilization", startedAt, response);
     try {
       const res = JSON.parse(response.data.choices[0].message.content) as {
         followUpQuestion?: string;
@@ -181,6 +373,7 @@ export const utilizeRecipes = async (
       return { error: getOpenAIErrorMessage(err) };
     }
   } catch (err) {
+    logOpenAIFailure("recipe-utilization", startedAt, err);
     return { error: getOpenAIErrorMessage(err) };
   }
 };
@@ -190,7 +383,6 @@ export const parseMeal = async (
   pastMessages: Message[],
   recipes: Meal[]
 ): ParseMealResponse => {
-  console.log(JSON.stringify(recipes));
   const messages = [
     {
       role: "system",
@@ -215,15 +407,18 @@ export const parseMeal = async (
       content: input,
     },
   ];
+  const startedAt = Date.now();
+  const requestBody = {
+    model: CHAT_MODEL,
+    messages,
+    response_format: { type: "json_object" },
+  };
+  logOpenAIRequest("meal-parsing", requestBody);
 
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
-      {
-        model: CHAT_MODEL,
-        messages: messages,
-        response_format: { type: "json_object" },
-      },
+      requestBody,
       {
         headers: {
           Authorization: AUTHORIZATION,
@@ -231,6 +426,7 @@ export const parseMeal = async (
         },
       }
     );
+    logOpenAIResponse("meal-parsing", startedAt, response);
     const date = new Date();
     try {
       const meal = JSON.parse(
@@ -248,6 +444,7 @@ export const parseMeal = async (
       return { error: getOpenAIErrorMessage(err) };
     }
   } catch (err) {
+    logOpenAIFailure("meal-parsing", startedAt, err);
     return { error: getOpenAIErrorMessage(err) };
   }
 };
@@ -272,15 +469,18 @@ export const parseMealRecipe = async (
       content: input,
     },
   ];
+  const startedAt = Date.now();
+  const requestBody = {
+    model: CHAT_MODEL,
+    messages,
+    response_format: { type: "json_object" },
+  };
+  logOpenAIRequest("recipe-parsing", requestBody);
 
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
-      {
-        model: CHAT_MODEL,
-        messages: messages,
-        response_format: { type: "json_object" },
-      },
+      requestBody,
       {
         headers: {
           Authorization: AUTHORIZATION,
@@ -288,6 +488,7 @@ export const parseMealRecipe = async (
         },
       }
     );
+    logOpenAIResponse("recipe-parsing", startedAt, response);
     const date = new Date();
     try {
       const meal = JSON.parse(
@@ -305,6 +506,7 @@ export const parseMealRecipe = async (
       return { error: getOpenAIErrorMessage(err) };
     }
   } catch (err) {
+    logOpenAIFailure("recipe-parsing", startedAt, err);
     return { error: getOpenAIErrorMessage(err) };
   }
 };
