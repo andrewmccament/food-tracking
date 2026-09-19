@@ -33,10 +33,22 @@ import { useLocalSearchParams } from "expo-router";
 import { RootState } from "@/state/store";
 
 export type ChatProps = {
-  onMealRetrieval: (mealId: string) => void;
+  onMealRetrieval?: (mealId: string) => void;
+  /**
+   * Lets a screen reuse the chat's text, voice, transcription, and message UI
+   * while owning the meaning of the request (for example, food planning).
+   */
+  onSubmit?: (input: string, previousMessages: Message[]) => Promise<string>;
+  placeholder?: string;
+  renderBelowMessages?: () => React.ReactNode;
 };
 
-export const Chat = ({ onMealRetrieval }: ChatProps) => {
+export const Chat = ({
+  onMealRetrieval,
+  onSubmit,
+  placeholder = "Type to AI...",
+  renderBelowMessages,
+}: ChatProps) => {
   const { logMode } = useLocalSearchParams();
   let recipes = useSelector((state: RootState) => state.food.meals).filter(
     (meal: Meal) => meal?.isAdded && meal?.recipe
@@ -152,6 +164,27 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             .concat({ from: MessageFrom.GPT, contents: "..." });
         });
       }
+
+      if (onSubmit) {
+        try {
+          const response = await onSubmit(transcription, messagesRef.current);
+          setMessages((previous) =>
+            previous.slice(0, -1).concat({
+              from: MessageFrom.GPT,
+              contents: response,
+            })
+          );
+        } catch {
+          setMessages((previous) =>
+            previous.slice(0, -1).concat({
+              from: MessageFrom.GPT,
+              contents: "I couldn't work that out. Please try again.",
+            })
+          );
+        }
+        return;
+      }
+
       const attemptUseRecipe =
         recipes.length > 0
           ? await utilizeRecipes(
@@ -197,7 +230,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
             dispatch(recordMeal(response));
 
             setMeal(response);
-            onMealRetrieval(response.mealId);
+            onMealRetrieval?.(response.mealId);
             setMessages((previous) =>
               previous.slice(0, -1).concat({
                 from: MessageFrom.GPT,
@@ -241,6 +274,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
               key={index}
             />
           ))}
+          {renderBelowMessages?.()}
         </View>
       </ScrollView>
       <View style={styles.chatRow}>
@@ -261,7 +295,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
         </View>
         <TextInput
           style={styles.input}
-          placeholder="Type to AI..."
+          placeholder={placeholder}
           returnKeyType="send"
           blurOnSubmit
           ref={inputRef}
@@ -279,7 +313,7 @@ export const Chat = ({ onMealRetrieval }: ChatProps) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: "100%",
+    flex: 1,
     backgroundColor: "black",
     padding: 8,
     paddingBottom: 24,

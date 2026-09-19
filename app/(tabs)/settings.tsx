@@ -11,6 +11,20 @@ export default function SettingsScreen() {
       </ThemedText>
       <TouchableOpacity
         style={styles.menuItem}
+        onPress={() => router.push("/settings/recipes")}
+        accessibilityRole="button"
+        accessibilityLabel="Recipes"
+      >
+        <View>
+          <ThemedText type="defaultSemiBold">Recipes</ThemedText>
+          <ThemedText style={styles.description}>
+            Create and manage your saved foods
+          </ThemedText>
+        </View>
+        <ThemedText style={styles.chevron}>›</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.menuItem, styles.menuItemSpaced]}
         onPress={() => router.push("/settings/goals")}
         accessibilityRole="button"
         accessibilityLabel="Goals"
@@ -46,6 +60,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  menuItemSpaced: {
+    marginTop: 12,
   },
   description: {
     color: "#a9a9ad",

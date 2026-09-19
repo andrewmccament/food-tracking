@@ -1,8 +1,7 @@
-import { router, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import React from "react";
-import { Button } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import HomeSVG from "../../svg/home.svg";
-import MyFoodsSVG from "../../svg/myfoods.svg";
 import TrendsSVG from "../../svg/trends.svg";
 import SettingsSVG from "../../svg/settings.svg";
 import { Colors } from "@/constants/Colors";
@@ -41,15 +40,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="foods"
+        name="plan"
         options={{
-          title: "Recipes",
+          title: "Plan",
           tabBarLabel: () => <></>,
-          tabBarIcon: (color) => (
-            <MyFoodsSVG
-              width={35}
-              height={35}
-              fill={color.focused ? "white" : Colors.themeColor}
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="restaurant-outline"
+              size={29}
+              color={focused ? "white" : Colors.themeColor}
             />
           ),
         }}
