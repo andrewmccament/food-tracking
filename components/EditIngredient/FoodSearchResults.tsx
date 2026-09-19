@@ -16,7 +16,7 @@ import { ProgressBar } from "../Shared/ProgressBar";
 import { convertFatSecretFood, scaleServing } from "@/helpers/food-utils";
 import { ThemedButton } from "../ThemedButton";
 import { ServingPicker } from "./ServingPicker";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 export type FoodSearchResultsProps = {
   searchResults: FoodSearchV1Response;
@@ -27,6 +27,7 @@ export const FoodSearchResults = ({
   searchResults,
   onFoodSelected,
 }: FoodSearchResultsProps) => {
+  const theme = useAppTheme();
   const [expandedIndex, setExpandedIndex] = React.useState(-1);
   const [expandedFoodDetails, setExpandedFoodDetails] =
     React.useState<FoodDetailedResponse>();
@@ -75,7 +76,7 @@ export const FoodSearchResults = ({
   return (
     <View style={styles.list}>
       {searchResults?.foods?.food?.map((food, index) => (
-        <View key={index} style={styles.resultContainer}>
+        <View key={index} style={[styles.resultContainer, { backgroundColor: theme.surface }]}>
           <TouchableOpacity onPress={() => expandIndex(index)}>
             <ThemedText type="subtitle">{food.food_name}</ThemedText>
             {index !== expandedIndex && (
@@ -122,6 +123,5 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     width: "100%",
     minHeight: 100,
-    backgroundColor: Colors.themeColorBackground,
   },
 });

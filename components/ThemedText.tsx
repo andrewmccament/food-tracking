@@ -1,6 +1,6 @@
 import { Text, type TextProps, StyleSheet, StyleProp } from "react-native";
 
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 export type ThemedTextProps = TextProps & {
   colorOverride?: string;
@@ -13,9 +13,8 @@ export function ThemedText({
   type = "default",
   ...rest
 }: ThemedTextProps) {
-  const color = colorOverride
-    ? colorOverride
-    : useThemeColor({ light: "black", dark: "white" }, "text");
+  const theme = useAppTheme();
+  const color = colorOverride ?? theme.text;
 
   return (
     <Text
@@ -31,7 +30,9 @@ export function ThemedText({
         type === "subtitle"
           ? { ...styles.subtitle, ...styles.shared }
           : undefined,
-        type === "link" ? { ...styles.link, ...styles.shared } : undefined,
+        type === "link"
+          ? { ...styles.link, ...styles.shared, color: theme.accent }
+          : undefined,
         style,
       ]}
       {...rest}
@@ -64,6 +65,5 @@ const styles = StyleSheet.create({
   link: {
     lineHeight: 30,
     fontSize: 16,
-    color: "#0a7ea4",
   },
 });

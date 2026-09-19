@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { logMeal } from "@/state/foodSlice";
 import { router } from "expo-router";
 import { ThemedText } from "../ThemedText";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 export type MessageProps = {
   from: MessageFrom;
   content: string;
@@ -25,6 +25,7 @@ export type Message = {
 };
 
 export const Message = ({ from, content, meal }: MessageProps) => {
+  const theme = useAppTheme();
   const loading = content === "...";
   const dispatch = useDispatch();
 
@@ -45,13 +46,13 @@ export const Message = ({ from, content, meal }: MessageProps) => {
         style={{
           ...styles.message,
           ...(from === MessageFrom.GPT
-            ? styles.gptMessage
-            : styles.userMessage),
+            ? { backgroundColor: theme.surfaceRaised }
+            : { backgroundColor: theme.accentSoft }),
           ...{ width: meal ? "100%" : "60%" },
         }}
       >
         <ThemedText
-          colorOverride={from === MessageFrom.GPT ? "black" : "white"}
+          colorOverride={from === MessageFrom.GPT ? theme.text : theme.text}
           style={{ fontSize: 18 }}
         >
           {content}
@@ -82,12 +83,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     fontSize: 18,
-  },
-  userMessage: {
-    backgroundColor: Colors.themeColorBackground,
-  },
-  gptMessage: {
-    backgroundColor: "#CACACA",
   },
   mealContainer: {
     paddingTop: 8,

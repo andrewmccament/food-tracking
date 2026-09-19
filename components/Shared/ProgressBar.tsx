@@ -7,6 +7,7 @@ import {
 } from "@/types/openAi.types";
 import React from "react";
 import { ThemedText } from "../ThemedText";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 export enum ProgressBarStyles {
   DEFAULT = 0,
@@ -31,6 +32,7 @@ export const ProgressBar = ({
   textColor,
   style = ProgressBarStyles.DEFAULT,
 }: ProgressBarProps) => {
+  const theme = useAppTheme();
   const goals = useSelector((state: RootState) => state.userData.goals);
   const thisMacroGoal = max ?? goals[macro];
   const percent = Math.min((amount / thisMacroGoal) * 100, 100).toString();
@@ -77,7 +79,7 @@ export const ProgressBar = ({
           width: style === ProgressBarStyles.FULL_SCREEN ? "100%" : "60%",
         }}
       >
-        <View style={styles.outerBar}>
+        <View style={[styles.outerBar, { backgroundColor: theme.progressTrack }]}>
           <View style={getInnerBarStyling()} />
         </View>
       </View>
@@ -89,7 +91,6 @@ const styles = StyleSheet.create({
   outerBar: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#CACACA",
     zIndex: 0,
     borderRadius: 2,
   },

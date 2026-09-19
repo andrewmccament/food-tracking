@@ -21,6 +21,8 @@ import * as Crypto from "expo-crypto";
 import React from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { AppTheme } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useDispatch, useSelector } from "react-redux";
 
 type PlannerStage = "entry" | "mode" | "wizard" | "known";
@@ -45,6 +47,8 @@ const initialMessages: Message[] = [
 ];
 
 export default function PlanScreen() {
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
   const dispatch = useDispatch();
   const goals = useSelector((state: RootState) => state.userData.goals);
   const overallGoal = useSelector(
@@ -360,7 +364,7 @@ export default function PlanScreen() {
           onPress={startOver}
           accessibilityLabel="Start planning over"
         >
-          <ThemedText colorOverride="#b8b8bd">Start over</ThemedText>
+          <ThemedText colorOverride={theme.textMuted}>Start over</ThemedText>
         </Pressable>
       </View>
       <Chat
@@ -407,6 +411,8 @@ function WizardOptions({ content, remaining, onChooseEntry, onChooseMode, onChoo
   onForceSuggestions: () => void;
   onRequestCommentary: (question: WizardQuestion, option: string) => void;
 }) {
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
   if (!content) return null;
   if (content.kind === "entry") return <OptionGroup options={["Yep, I have something in mind", "Not really—help me decide"]} onChoose={(option) => onChooseEntry(option.startsWith("Yep"))} />;
   if (content.kind === "mode") {
@@ -416,34 +422,41 @@ function WizardOptions({ content, remaining, onChooseEntry, onChooseMode, onChoo
     }} />;
   }
   if (content.kind === "question") {
-    return <View><WizardQuestionOptions options={content.question.options} onChoose={(option) => onChooseQuestion(content.question, option)} onRequestCommentary={(option) => onRequestCommentary(content.question, option)} /><Pressable style={styles.suggestNow} onPress={onForceSuggestions}><ThemedText colorOverride="#b8b8bd">Just give me suggestions</ThemedText></Pressable></View>;
+    return <View><WizardQuestionOptions options={content.question.options} onChoose={(option) => onChooseQuestion(content.question, option)} onRequestCommentary={(option) => onRequestCommentary(content.question, option)} /><Pressable style={styles.suggestNow} onPress={onForceSuggestions}><ThemedText colorOverride={theme.textMuted}>Just give me suggestions</ThemedText></Pressable></View>;
   }
-  return <View style={styles.recommendations}><ThemedText style={styles.recommendationHint}>{content.level === "format" ? "Pick a direction that sounds good." : "A few ways that format could fit today. When you choose a restaurant, log the exact order from Today."}</ThemedText>{content.recommendations.map((recommendation) => <RecommendationCard key={recommendation.id} recommendation={recommendation} remaining={remaining} level={content.level} onPress={content.level === "format" ? () => onChooseFormatRecommendation(recommendation) : undefined} />)}<Pressable style={styles.suggestNow} onPress={onForceSuggestions}><ThemedText colorOverride="#b8b8bd">Keep suggesting</ThemedText></Pressable></View>;
+  return <View style={styles.recommendations}><ThemedText style={styles.recommendationHint}>{content.level === "format" ? "Pick a direction that sounds good." : "A few ways that format could fit today. When you choose a restaurant, log the exact order from Today."}</ThemedText>{content.recommendations.map((recommendation) => <RecommendationCard key={recommendation.id} recommendation={recommendation} remaining={remaining} level={content.level} onPress={content.level === "format" ? () => onChooseFormatRecommendation(recommendation) : undefined} />)}<Pressable style={styles.suggestNow} onPress={onForceSuggestions}><ThemedText colorOverride={theme.textMuted}>Keep suggesting</ThemedText></Pressable></View>;
 }
 
 function OptionGroup({ options, onChoose }: { options: string[]; onChoose: (option: string) => void }) {
-  return <View style={styles.options}>{options.map((option) => <Pressable key={option} style={styles.option} onPress={() => onChoose(option)}><ThemedText colorOverride="white">{option}</ThemedText></Pressable>)}</View>;
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
+  return <View style={styles.options}>{options.map((option) => <Pressable key={option} style={styles.option} onPress={() => onChoose(option)}><ThemedText colorOverride={theme.text}>{option}</ThemedText></Pressable>)}</View>;
 }
 
 function WizardQuestionOptions({ options, onChoose, onRequestCommentary }: { options: WizardOption[]; onChoose: (option: string) => void; onRequestCommentary: (option: string) => void }) {
-  return <View style={styles.options}>{options.map((option) => <View key={option.id} style={styles.option}><Pressable style={styles.optionMain} onPress={() => onChoose(option.label)}><ThemedText colorOverride="white">{option.label}</ThemedText></Pressable>{option.requiresCommentary && <Pressable style={styles.optionMic} onPress={() => onRequestCommentary(option.label)} accessibilityLabel={`Add commentary for ${option.label}`}><Ionicons name="mic-outline" size={21} color="#69cedf" /></Pressable>}</View>)}</View>;
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
+  return <View style={styles.options}>{options.map((option) => <View key={option.id} style={styles.option}><Pressable style={styles.optionMain} onPress={() => onChoose(option.label)}><ThemedText colorOverride={theme.text}>{option.label}</ThemedText></Pressable>{option.requiresCommentary && <Pressable style={styles.optionMic} onPress={() => onRequestCommentary(option.label)} accessibilityLabel={`Add commentary for ${option.label}`}><Ionicons name="mic-outline" size={21} color={theme.accent} /></Pressable>}</View>)}</View>;
 }
 
 function RecommendationCard({ recommendation, remaining, level, onPress }: { recommendation: SuggestedMeal; remaining: DisplayedMacros; level: RecommendationLevel; onPress?: () => void }) {
+  const styles = createStyles(useAppTheme());
   const after = getRemainingMacros(remaining, recommendation.estimatedMacros);
   return <Pressable style={styles.recommendation} onPress={onPress} disabled={!onPress}><ThemedText type="defaultSemiBold">{recommendation.title}</ThemedText>{level === "option" && <><ThemedText style={styles.recommendationDescription}>{recommendation.description}</ThemedText><ThemedText style={styles.rationale}>{recommendation.rationale}</ThemedText></>}<ThemedText style={styles.impact}>~{recommendation.estimatedMacros.calories} kcal · {recommendation.estimatedMacros.protein}g protein · {recommendation.estimatedMacros.net_carbohydrates}g net carbs</ThemedText><ThemedText style={styles.afterImpact}>{formatRemaining(after)}</ThemedText></Pressable>;
 }
 
 function PlanImpactCard({ meal, macros, remaining, remainingAfter, onLog }: { meal: Meal; macros: DisplayedMacros; remaining: DisplayedMacros; remainingAfter: DisplayedMacros; onLog: () => void }) {
-  return <View style={styles.resultCard}><ThemedText type="subtitle">{meal.summary}</ThemedText><ThemedText style={styles.assumption}>Estimated from the exact amount you described.</ThemedText><ThemedText style={styles.fitMessage}>{getFitMessage(remaining.calories, macros.calories)}</ThemedText><View style={styles.macroGrid}><MacroValue label="Calories" value={macros.calories} /><MacroValue label="Protein" value={macros.protein} suffix="g" /><MacroValue label="Carbs" value={macros.carbohydrate} suffix="g" /><MacroValue label="Fat" value={macros.fat} suffix="g" /></View><ThemedText type="defaultSemiBold" style={styles.afterTitle}>After this plan</ThemedText><ThemedText style={styles.afterText}>{formatRemaining(remainingAfter)}</ThemedText><Pressable style={styles.logButton} onPress={onLog}><ThemedText colorOverride="black" type="defaultSemiBold">Log this plan</ThemedText></Pressable></View>;
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
+  return <View style={styles.resultCard}><ThemedText type="subtitle">{meal.summary}</ThemedText><ThemedText style={styles.assumption}>Estimated from the exact amount you described.</ThemedText><ThemedText style={styles.fitMessage}>{getFitMessage(remaining.calories, macros.calories)}</ThemedText><View style={styles.macroGrid}><MacroValue label="Calories" value={macros.calories} /><MacroValue label="Protein" value={macros.protein} suffix="g" /><MacroValue label="Carbs" value={macros.carbohydrate} suffix="g" /><MacroValue label="Fat" value={macros.fat} suffix="g" /></View><ThemedText type="defaultSemiBold" style={styles.afterTitle}>After this plan</ThemedText><ThemedText style={styles.afterText}>{formatRemaining(remainingAfter)}</ThemedText><Pressable style={styles.logButton} onPress={onLog}><ThemedText colorOverride={theme.textOnAccent} type="defaultSemiBold">Log this plan</ThemedText></Pressable></View>;
 }
 
-function BudgetValue({ label, value, unit }: { label: string; value: number; unit: string }) { return <View><ThemedText style={styles.budgetValue}>{Math.round(value)}{unit}</ThemedText><ThemedText style={styles.budgetLabel}>{label}</ThemedText></View>; }
-function MacroValue({ label, value, suffix = "" }: { label: string; value: number; suffix?: string }) { return <View style={styles.macroValue}><ThemedText type="defaultSemiBold">{value}{suffix}</ThemedText><ThemedText style={styles.macroLabel}>{label}</ThemedText></View>; }
+function BudgetValue({ label, value, unit }: { label: string; value: number; unit: string }) { const styles = createStyles(useAppTheme()); return <View><ThemedText style={styles.budgetValue}>{Math.round(value)}{unit}</ThemedText><ThemedText style={styles.budgetLabel}>{label}</ThemedText></View>; }
+function MacroValue({ label, value, suffix = "" }: { label: string; value: number; suffix?: string }) { const styles = createStyles(useAppTheme()); return <View style={styles.macroValue}><ThemedText type="defaultSemiBold">{value}{suffix}</ThemedText><ThemedText style={styles.macroLabel}>{label}</ThemedText></View>; }
 function asksForSuggestions(input: string) { return /\b(suggest|ideas|pick for me|surprise me|just choose)\b/i.test(input); }
 function getFitMessage(remainingCalories: number, plannedCalories: number) { if (remainingCalories <= 0) return "You are already around today's calorie target. You can still choose this—this just makes the trade-off visible."; if (plannedCalories <= remainingCalories) return "This fits within your remaining calorie target."; return `This is about ${Math.abs(remainingCalories - plannedCalories)} kcal over your remaining calorie target.`; }
 function formatRemaining(remaining: DisplayedMacros) { return `${Math.round(remaining.calories)} kcal left · ${Math.round(remaining.protein)}g protein left · ${Math.round(remaining.net_carbohydrates)}g net carbs left`; }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "black" }, header: { paddingHorizontal: 16, paddingTop: 12 }, budgetCard: { flexDirection: "row", justifyContent: "space-between", backgroundColor: "#1c1c1e", borderRadius: 10, padding: 14 }, budgetValue: { fontSize: 20, fontWeight: "700" }, budgetLabel: { color: "#a9a9ad", fontSize: 12, marginTop: 2 }, startOver: { alignSelf: "flex-end", paddingVertical: 10, paddingHorizontal: 4 }, options: { margin: 12, gap: 8 }, option: { backgroundColor: "#303033", borderRadius: 10, flexDirection: "row", alignItems: "center", padding: 8 }, optionMain: { flex: 1, paddingHorizontal: 14, paddingVertical: 12 }, optionMic: { padding: 12 }, suggestNow: { alignItems: "center", paddingVertical: 8 }, recommendations: { margin: 12, gap: 10 }, recommendationHint: { color: "#b8b8bd", fontSize: 13 }, recommendation: { backgroundColor: "#1c1c1e", borderRadius: 10, padding: 14 }, recommendationDescription: { color: "#e6e6e8", marginTop: 3 }, rationale: { color: "#b8b8bd", fontSize: 13, marginTop: 8 }, impact: { color: "#69cedf", marginTop: 10 }, afterImpact: { color: "#a9a9ad", fontSize: 13, marginTop: 3 }, resultCard: { margin: 12, backgroundColor: "#1c1c1e", borderRadius: 10, padding: 16 }, assumption: { color: "#a9a9ad", fontSize: 13, marginTop: 5 }, fitMessage: { color: "#69cedf", marginTop: 16, lineHeight: 20 }, macroGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 16, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#3a3a3c", paddingTop: 12 }, macroValue: { width: "50%", marginBottom: 10 }, macroLabel: { color: "#a9a9ad", fontSize: 13 }, afterTitle: { marginTop: 4 }, afterText: { color: "#b8b8bd", marginTop: 4 }, logButton: { backgroundColor: "#69cedf", borderRadius: 8, alignItems: "center", marginTop: 20, paddingVertical: 13 },
+const createStyles = (theme: AppTheme) => StyleSheet.create({
+  screen: { flex: 1, backgroundColor: theme.background }, header: { paddingHorizontal: 16, paddingTop: 12 }, budgetCard: { flexDirection: "row", justifyContent: "space-between", backgroundColor: theme.surface, borderRadius: 10, padding: 14 }, budgetValue: { fontSize: 20, fontWeight: "700" }, budgetLabel: { color: theme.textSubtle, fontSize: 12, marginTop: 2 }, startOver: { alignSelf: "flex-end", paddingVertical: 10, paddingHorizontal: 4 }, options: { margin: 12, gap: 8 }, option: { backgroundColor: theme.surfaceRaised, borderRadius: 10, flexDirection: "row", alignItems: "center", padding: 8 }, optionMain: { flex: 1, paddingHorizontal: 14, paddingVertical: 12 }, optionMic: { padding: 12 }, suggestNow: { alignItems: "center", paddingVertical: 8 }, recommendations: { margin: 12, gap: 10 }, recommendationHint: { color: theme.textMuted, fontSize: 13 }, recommendation: { backgroundColor: theme.surface, borderRadius: 10, padding: 14 }, recommendationDescription: { color: theme.text, marginTop: 3 }, rationale: { color: theme.textMuted, fontSize: 13, marginTop: 8 }, impact: { color: theme.accent, marginTop: 10 }, afterImpact: { color: theme.textSubtle, fontSize: 13, marginTop: 3 }, resultCard: { margin: 12, backgroundColor: theme.surface, borderRadius: 10, padding: 16 }, assumption: { color: theme.textSubtle, fontSize: 13, marginTop: 5 }, fitMessage: { color: theme.accent, marginTop: 16, lineHeight: 20 }, macroGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 16, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.divider, paddingTop: 12 }, macroValue: { width: "50%", marginBottom: 10 }, macroLabel: { color: theme.textSubtle, fontSize: 13 }, afterTitle: { marginTop: 4 }, afterText: { color: theme.textMuted, marginTop: 4 }, logButton: { backgroundColor: theme.accent, borderRadius: 8, alignItems: "center", marginTop: 20, paddingVertical: 13 },
 });

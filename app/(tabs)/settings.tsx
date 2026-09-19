@@ -1,55 +1,57 @@
 import { ThemedText } from "@/components/ThemedText";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function SettingsScreen() {
+  const theme = useAppTheme();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ThemedText type="title" style={styles.title}>
         Settings
       </ThemedText>
       <TouchableOpacity
-        style={styles.menuItem}
+        style={[styles.menuItem, { backgroundColor: theme.surface }]}
         onPress={() => router.push("/settings/recipes")}
         accessibilityRole="button"
         accessibilityLabel="Recipes"
       >
         <View>
           <ThemedText type="defaultSemiBold">Recipes</ThemedText>
-          <ThemedText style={styles.description}>
+          <ThemedText style={[styles.description, { color: theme.textSubtle }]}>
             Create and manage your saved foods
           </ThemedText>
         </View>
-        <ThemedText style={styles.chevron}>›</ThemedText>
+        <ThemedText style={[styles.chevron, { color: theme.textSubtle }]}>›</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.menuItem, styles.menuItemSpaced]}
+        style={[styles.menuItem, styles.menuItemSpaced, { backgroundColor: theme.surface }]}
         onPress={() => router.push("/settings/focus")}
         accessibilityRole="button"
         accessibilityLabel="Focus"
       >
         <View>
           <ThemedText type="defaultSemiBold">Focus</ThemedText>
-          <ThemedText style={styles.description}>
+          <ThemedText style={[styles.description, { color: theme.textSubtle }]}>
             Choose the metrics shown in summaries
           </ThemedText>
         </View>
-        <ThemedText style={styles.chevron}>›</ThemedText>
+        <ThemedText style={[styles.chevron, { color: theme.textSubtle }]}>›</ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.menuItem, styles.menuItemSpaced]}
+        style={[styles.menuItem, styles.menuItemSpaced, { backgroundColor: theme.surface }]}
         onPress={() => router.push("/settings/goals")}
         accessibilityRole="button"
         accessibilityLabel="Goals"
       >
         <View>
           <ThemedText type="defaultSemiBold">Goals</ThemedText>
-          <ThemedText style={styles.description}>
+          <ThemedText style={[styles.description, { color: theme.textSubtle }]}>
             Customize your daily nutrition targets
           </ThemedText>
         </View>
-        <ThemedText style={styles.chevron}>›</ThemedText>
+        <ThemedText style={[styles.chevron, { color: theme.textSubtle }]}>›</ThemedText>
       </TouchableOpacity>
     </View>
   );
@@ -58,19 +60,16 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
     padding: 20,
   },
   title: {
     marginBottom: 24,
-    color: "white",
   },
   menuItem: {
     minHeight: 72,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 10,
-    backgroundColor: "#1c1c1e",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -79,11 +78,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   description: {
-    color: "#a9a9ad",
     fontSize: 14,
   },
   chevron: {
-    color: "#a9a9ad",
     fontSize: 30,
     lineHeight: 30,
   },

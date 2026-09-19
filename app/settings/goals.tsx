@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { ThemedText } from "@/components/ThemedText";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { RootState } from "@/state/store";
 
 type GoalInputValues = Record<DisplayedMacroTypes, string>;
@@ -23,6 +24,7 @@ const editableMacroConfig = DisplayedMacroConfig.filter(
 );
 
 export default function GoalsScreen() {
+  const theme = useAppTheme();
   const router = useRouter();
   const dispatch = useDispatch();
   const goals = useSelector((state: RootState) => state.userData.goals);
@@ -68,18 +70,18 @@ export default function GoalsScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.screen}
+      style={[styles.screen, { backgroundColor: theme.background }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <ThemedText style={styles.intro}>
+        <ThemedText style={[styles.intro, { color: theme.textMuted }]}>
           Set the targets you want to see on Today. These are intentionally simple
           estimates, and you can change them whenever your needs change.
         </ThemedText>
 
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
           {editableMacroConfig.map(({ type, displayName, shortUnit }) => (
-            <View key={type} style={styles.inputRow}>
+            <View key={type} style={[styles.inputRow, { borderBottomColor: theme.divider }]}>
               <ThemedText style={styles.label}>{displayName}</ThemedText>
               <View style={styles.inputWrapper}>
                 <TextInput
@@ -88,10 +90,10 @@ export default function GoalsScreen() {
                   keyboardType="decimal-pad"
                   inputMode="decimal"
                   selectTextOnFocus
-                  style={styles.input}
+                  style={[styles.input, { color: theme.text }]}
                   accessibilityLabel={`${displayName} daily goal`}
                 />
-                <ThemedText style={styles.unit}>
+                <ThemedText style={[styles.unit, { color: theme.textSubtle }]}>
                   {type === DisplayedMacroTypes.calories ? "kcal" : shortUnit}
                 </ThemedText>
               </View>
@@ -99,19 +101,19 @@ export default function GoalsScreen() {
           ))}
         </View>
 
-        <ThemedText style={styles.note}>
+        <ThemedText style={[styles.note, { color: theme.textSubtle }]}>
           Net carbs are calculated from carbs minus fiber. A future goal calculator
           can use your height, sex, weight, BMI, and desired weekly weight change
           to suggest these targets.
         </ThemedText>
 
-        <Pressable style={styles.saveButton} onPress={saveGoals}>
-          <ThemedText type="defaultSemiBold" colorOverride="black">
+        <Pressable style={[styles.saveButton, { backgroundColor: theme.accent }]} onPress={saveGoals}>
+          <ThemedText type="defaultSemiBold" colorOverride={theme.textOnAccent}>
             Save goals
           </ThemedText>
         </Pressable>
         <Pressable style={styles.resetButton} onPress={resetGoals}>
-          <ThemedText colorOverride="#ff8f8f">Reset to defaults</ThemedText>
+          <ThemedText colorOverride={theme.danger}>Reset to defaults</ThemedText>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -132,20 +134,17 @@ function isPositiveNumber(value: string) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "black",
   },
   content: {
     padding: 20,
     paddingBottom: 40,
   },
   intro: {
-    color: "#b8b8bd",
     marginBottom: 20,
   },
   card: {
     borderRadius: 10,
     paddingHorizontal: 16,
-    backgroundColor: "#1c1c1e",
   },
   inputRow: {
     minHeight: 58,
@@ -153,11 +152,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#3a3a3c",
   },
   label: {
     fontSize: 16,
-    color: "white",
   },
   inputWrapper: {
     flexDirection: "row",
@@ -165,7 +162,6 @@ const styles = StyleSheet.create({
   },
   input: {
     minWidth: 72,
-    color: "white",
     fontSize: 17,
     textAlign: "right",
     paddingVertical: 8,
@@ -173,17 +169,14 @@ const styles = StyleSheet.create({
   unit: {
     width: 42,
     marginLeft: 6,
-    color: "#a9a9ad",
   },
   note: {
-    color: "#88888d",
     fontSize: 13,
     lineHeight: 19,
     marginTop: 16,
   },
   saveButton: {
     alignItems: "center",
-    backgroundColor: "#69cedf",
     borderRadius: 8,
     marginTop: 28,
     paddingVertical: 13,

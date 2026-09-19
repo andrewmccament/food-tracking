@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   View,
   StyleSheet,
@@ -20,17 +20,23 @@ export type ThemedButtonProps = {
 };
 
 export const ThemedButton = ({ title, onPress, style }: ThemedButtonProps) => {
+  const theme = useAppTheme();
+  const darkStyle = style === ButtonStyle.DARK;
   return (
     <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
       <View
-        style={{
-          ...styles.button,
-          backgroundColor: style === 1 ? "black" : "black",
-        }}
+        style={[
+          styles.button,
+          {
+            backgroundColor: darkStyle ? theme.surface : theme.accent,
+            borderColor: darkStyle ? theme.border : theme.accent,
+            shadowColor: theme.shadow,
+          },
+        ]}
       >
         <ThemedText
           type="defaultSemiBold"
-          style={{ color: style === 1 ? "white" : "white" }}
+          colorOverride={darkStyle ? theme.text : theme.textOnAccent}
         >
           {title}
         </ThemedText>
@@ -46,11 +52,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   button: {
-    borderColor: Colors.themeColor,
-    backgroundColor: "black",
     borderWidth: 2,
     shadowRadius: 4,
-    shadowColor: "gray",
     width: "75%",
     borderRadius: 128,
     justifyContent: "center",

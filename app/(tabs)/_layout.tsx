@@ -4,23 +4,24 @@ import { Ionicons } from "@expo/vector-icons";
 import HomeSVG from "../../svg/home.svg";
 import TrendsSVG from "../../svg/trends.svg";
 import SettingsSVG from "../../svg/settings.svg";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 export default function TabLayout() {
+  const theme = useAppTheme();
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: "black",
-          borderTopColor: "black",
+          backgroundColor: theme.tabBackground,
+          borderTopColor: theme.divider,
         },
-        tabBarActiveTintColor: "blue",
+        tabBarActiveTintColor: theme.accent,
         headerStyle: {
-          backgroundColor: "#000000",
-          borderColor: "black",
+          backgroundColor: theme.surface,
+          borderColor: theme.divider,
         },
         headerTitleStyle: {
-          color: "white",
+          color: theme.text,
         },
         headerShadowVisible: false,
       }}
@@ -34,7 +35,7 @@ export default function TabLayout() {
             <HomeSVG
               width={35}
               height={35}
-              color={color.focused ? "#ffffff" : Colors.themeColor}
+              color={color.focused ? theme.text : theme.tabInactive}
             />
           ),
         }}
@@ -48,7 +49,7 @@ export default function TabLayout() {
             <Ionicons
               name="restaurant-outline"
               size={29}
-              color={focused ? "white" : Colors.themeColor}
+              color={focused ? theme.text : theme.tabInactive}
             />
           ),
         }}
@@ -62,7 +63,7 @@ export default function TabLayout() {
             <TrendsSVG
               width={35}
               height={35}
-              color={color.focused ? "#ffffff" : Colors.themeColor}
+              color={color.focused ? theme.text : theme.tabInactive}
             />
           ),
         }}
@@ -76,7 +77,7 @@ export default function TabLayout() {
             <SettingsSVG
               width={35}
               height={35}
-              color={color.focused ? "#ffffff" : Colors.themeColor}
+              color={color.focused ? theme.text : theme.tabInactive}
             />
           ),
         }}

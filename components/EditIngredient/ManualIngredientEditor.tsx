@@ -17,7 +17,7 @@ import {
 } from "@/types/openAi.types";
 import { ServingPicker } from "./ServingPicker";
 import { scaleServing } from "@/helpers/food-utils";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { ThemedText } from "../ThemedText";
 
 export type ManualIngredientEditorProps = {
@@ -29,6 +29,7 @@ export const ManualIngredientEditor = ({
   ingredient,
   onUpdateIngredient,
 }: ManualIngredientEditorProps) => {
+  const theme = useAppTheme();
   const [amount, setAmount] = React.useState(
     ingredient.serving.number_of_units
   );
@@ -48,13 +49,13 @@ export const ManualIngredientEditor = ({
 
   return (
     <KeyboardAvoidingView
-      style={{ backgroundColor: "black" }}
+      style={{ backgroundColor: theme.background }}
       behavior="padding"
     >
       <ScrollView>
         <View style={styles.container}>
           <TextInput
-            style={styles.searchBox}
+            style={[styles.searchBox, { borderColor: theme.accent, color: theme.text }]}
             onSubmitEditing={(event) =>
               editIngredientName(event.nativeEvent.text)
             }
@@ -62,10 +63,10 @@ export const ManualIngredientEditor = ({
           >
             {capFirstLetter(ingredient?.food_name)}
           </TextInput>
-          <View style={styles.panel}>
+          <View style={[styles.panel, { backgroundColor: theme.surfaceRaised }] }>
             <MacroBreakdown macros={ingredient?.serving} />
           </View>
-          <View style={styles.panel}>
+          <View style={[styles.panel, { backgroundColor: theme.surfaceRaised }] }>
             {DisplayedMacroIterator.map((macro, index) => (
               <View style={styles.macroEditor} key={index}>
                 <ThemedText>
@@ -77,7 +78,7 @@ export const ManualIngredientEditor = ({
                 </ThemedText>
                 <TextInput
                   onChangeText={(text) => updateMacro(macro, text)}
-                  style={{ ...styles.searchBox, width: "auto" }}
+                  style={[styles.searchBox, { width: "auto", borderColor: theme.accent, color: theme.text }]}
                   keyboardType="numeric"
                 >
                   {ingredient?.serving[macro]}
@@ -85,7 +86,7 @@ export const ManualIngredientEditor = ({
               </View>
             ))}
           </View>
-          <View style={{ ...styles.panel }}>
+          <View style={[styles.panel, { backgroundColor: theme.surfaceRaised }]}>
             <ServingPicker
               possibleServings={[ingredient?.serving]}
               onAmountChange={(val: number) => {
@@ -114,17 +115,14 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignItems: "center",
-    backgroundColor: "black",
   },
   searchBox: {
     borderWidth: 1,
     height: 40,
     width: "100%",
     paddingHorizontal: 8,
-    borderColor: Colors.themeColor,
     borderRadius: 8,
     fontSize: 18,
-    color: "white",
   },
   panel: {
     width: "100%",
@@ -133,7 +131,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexWrap: "wrap",
     gap: 8,
-    backgroundColor: Colors.themeColorBackground,
     borderRadius: 12,
   },
   macroEditor: {
@@ -141,7 +138,6 @@ const styles = StyleSheet.create({
     height: 100,
     borderWidth: 1,
     borderRadius: 8,
-    borderColor: Colors.themeColor,
     padding: 2,
     justifyContent: "space-evenly",
     alignItems: "center",

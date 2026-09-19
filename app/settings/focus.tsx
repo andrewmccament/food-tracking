@@ -1,4 +1,5 @@
 import { ThemedText } from "@/components/ThemedText";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   defaultFocusedMetrics,
   setFocusedMetrics,
@@ -10,6 +11,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function FocusScreen() {
+  const theme = useAppTheme();
   const dispatch = useDispatch();
   const focusedMetrics = useSelector(
     (state: RootState) => state.userData.focusedMetrics ?? defaultFocusedMetrics
@@ -32,18 +34,18 @@ export default function FocusScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <ThemedText style={styles.intro}>
+    <ScrollView style={[styles.screen, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
+      <ThemedText style={[styles.intro, { color: theme.textMuted }]}>
         Pick the metrics that matter most to you. They appear on Today and on
         compact meal summaries; detailed views still show everything.
       </ThemedText>
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.surface }]}>
         {DisplayedMacroConfig.map(({ type, displayName, shortUnit, color }) => {
           const isFocused = focusedMetrics.includes(type);
           return (
             <Pressable
               key={type}
-              style={styles.option}
+              style={[styles.option, { borderBottomColor: theme.divider }]}
               onPress={() => toggleMetric(type)}
               accessibilityRole="checkbox"
               accessibilityState={{ checked: isFocused }}
@@ -53,13 +55,13 @@ export default function FocusScreen() {
                 <View style={[styles.colorDot, { backgroundColor: color }]} />
                 <View>
                   <ThemedText type="defaultSemiBold">{displayName}</ThemedText>
-                  <ThemedText style={styles.unit}>
+                  <ThemedText style={[styles.unit, { color: theme.textSubtle }]}>
                     {type === DisplayedMacroTypes.calories ? "Calories" : `Grams (${shortUnit})`}
                   </ThemedText>
                 </View>
               </View>
-              <View style={[styles.checkbox, isFocused && styles.checkboxSelected]}>
-                {isFocused && <ThemedText colorOverride="black">✓</ThemedText>}
+              <View style={[styles.checkbox, { borderColor: theme.border }, isFocused && { borderColor: theme.accent, backgroundColor: theme.accent }]}>
+                {isFocused && <ThemedText colorOverride={theme.textOnAccent}>✓</ThemedText>}
               </View>
             </Pressable>
           );
@@ -70,29 +72,26 @@ export default function FocusScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "black" },
+  screen: { flex: 1 },
   content: { padding: 20, paddingBottom: 40 },
-  intro: { color: "#b8b8bd", marginBottom: 20 },
-  card: { backgroundColor: "#1c1c1e", borderRadius: 10, paddingHorizontal: 16 },
+  intro: { marginBottom: 20 },
+  card: { borderRadius: 10, paddingHorizontal: 16 },
   option: {
     minHeight: 64,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#3a3a3c",
   },
   optionLabel: { flexDirection: "row", alignItems: "center", gap: 10 },
   colorDot: { height: 10, width: 10, borderRadius: 5 },
-  unit: { color: "#a9a9ad", fontSize: 13 },
+  unit: { fontSize: 13 },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#85858a",
     alignItems: "center",
     justifyContent: "center",
   },
-  checkboxSelected: { borderColor: "#69cedf", backgroundColor: "#69cedf" },
 });

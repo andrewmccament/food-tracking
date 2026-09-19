@@ -6,13 +6,14 @@ import { ExternalLink } from "@/components/ExternalLink";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Colors } from "@/constants/Colors";
 
 export default function TrendsScreen() {
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
+      headerBackgroundColor={{ light: Colors.light.surfaceRaised, dark: Colors.dark.surfaceRaised }}
       headerImage={
-        <Ionicons size={310} name="code-slash" style={styles.headerImage} />
+        <Ionicons size={310} name="code-slash" style={[styles.headerImage, { color: Colors.light.tabInactive }]} />
       }
     >
       <ThemedView style={styles.titleContainer}>
@@ -112,7 +113,6 @@ export default function TrendsScreen() {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: "#808080",
     bottom: -90,
     left: -35,
     position: "absolute",

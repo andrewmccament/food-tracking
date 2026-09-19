@@ -11,7 +11,6 @@ import {
   Alert,
   TouchableOpacity,
   TextInput,
-  useColorScheme,
 } from "react-native";
 import { ProgressBar, ProgressBarStyles } from "./ProgressBar";
 import { ThemedText } from "../ThemedText";
@@ -32,7 +31,7 @@ import DeleteSVG from "../../svg/delete.svg";
 import EditSVG from "../../svg/edit.svg";
 import DoneSVG from "../../svg/done.svg";
 import AddSVG from "../../svg/add.svg";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { ThemedView } from "../ThemedView";
 import { defaultFocusedMetrics } from "@/state/userDataSlice";
 
@@ -75,7 +74,7 @@ export default function MealSummary({
 }: MealSummaryProps) {
   const [expanded, setExpanded] = React.useState(expandedByDefault);
   const [editing, setEditing] = React.useState(false);
-  let colorScheme = useColorScheme();
+  const theme = useAppTheme();
 
   const meal = useSelector((state: RootState) => state.food.meals).find(
     (meal: Meal) => meal.mealId === mealId
@@ -158,7 +157,7 @@ export default function MealSummary({
         {meal.recipe && editing && !preview && (
           <TextInput
             placeholder="Name your recipe..."
-            style={styles.titleEdit}
+            style={[styles.titleEdit, { color: theme.text }]}
             onSubmitEditing={(event) =>
               updateRecipeTitle(event.nativeEvent.text)
             }
@@ -169,7 +168,7 @@ export default function MealSummary({
         <View style={styles.row}>
           {preview && onComplete ? (
             <TouchableOpacity onPress={onComplete} accessibilityLabel="Add meal to today">
-              <DoneSVG width={32} height={32} fill="#4ade80" />
+              <DoneSVG width={32} height={32} color={theme.success} />
             </TouchableOpacity>
           ) : editing ? (
             <TouchableOpacity
@@ -181,7 +180,7 @@ export default function MealSummary({
               <DoneSVG
                 width={30}
                 height={30}
-                fill={colorScheme === "dark" ? "#ffffff" : Colors.themeColor}
+                color={theme.accent}
               />
             </TouchableOpacity>
           ) : (
@@ -193,7 +192,7 @@ export default function MealSummary({
               <EditSVG
                 width={30}
                 height={25}
-                color={colorScheme === "dark" ? "#ffffff" : Colors.themeColor}
+                color={theme.accent}
               />
             </TouchableOpacity>
           )}
@@ -203,14 +202,14 @@ export default function MealSummary({
               <DeleteSVG
                 width={30}
                 height={30}
-                fill={colorScheme === "dark" ? "red" : "#C2473E"}
+                color={theme.danger}
               />
             </TouchableOpacity>
           )}
 
           {!preview && allowAdding && onAdd && (
             <TouchableOpacity onPress={onAdd}>
-              <AddSVG width={30} height={30} color={Colors.themeColor} />
+              <AddSVG width={30} height={30} color={theme.accent} />
             </TouchableOpacity>
           )}
         </View>
@@ -239,7 +238,7 @@ export default function MealSummary({
             <Picker
               selectedValue={meal.recipe.yields}
               onValueChange={(value) => updateRecipeYields(value)}
-              itemStyle={{ color: "white" }}
+              itemStyle={{ color: theme.text }}
             >
               {recipeServings.map((i) => (
                 <Picker.Item value={i} label={i + " servings"} />
@@ -261,7 +260,7 @@ export default function MealSummary({
       </View>
       {editing && !preview ? (
         <TextInput
-          style={styles.summaryInputBox}
+          style={[styles.summaryInputBox, { color: theme.text }]}
           value={meal.summary}
           multiline
           onChangeText={(text) => updateMealSummary(text)}
@@ -297,7 +296,7 @@ export default function MealSummary({
                   <DeleteSVG
                     width={30}
                     height={30}
-                    fill={colorScheme === "dark" ? "red" : "#C2473E"}
+                    color={theme.danger}
                   />
                 </TouchableOpacity>
               </View>
@@ -305,7 +304,7 @@ export default function MealSummary({
             </TouchableOpacity>
           ))}
           <TouchableOpacity style={styles.addIngredient}>
-            <AddSVG width={65} height={65} color={Colors.themeColor} />
+            <AddSVG width={65} height={65} color={theme.accent} />
           </TouchableOpacity>
         </ScrollView>
       )}
@@ -355,10 +354,8 @@ const styles = StyleSheet.create({
   categoryPickerBtn: {},
   summaryInputBox: {
     fontSize: 16,
-    color: "white",
   },
   titleEdit: {
-    color: "white",
     fontSize: 22,
   },
   addIngredient: {

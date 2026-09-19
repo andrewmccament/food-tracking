@@ -2,6 +2,7 @@ import { Serving } from "@/types/openAi.types";
 import { View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 export type ServingPickerProps = {
   possibleServings: Serving[];
@@ -14,6 +15,7 @@ export const ServingPicker = ({
   onAmountChange,
   onServingIndexChange,
 }: ServingPickerProps) => {
+  const theme = useAppTheme();
   let numericOptions: number[] = [];
   for (let i = 0.05; i < 1000; i += 0.05) {
     numericOptions.push(parseFloat(i.toFixed(2)));
@@ -57,7 +59,7 @@ export const ServingPicker = ({
       <Picker
         selectedValue={amount}
         style={styles.servingTypePicker}
-        itemStyle={{ color: "white" }}
+        itemStyle={{ color: theme.text }}
         onValueChange={(itemValue: number) => {
           changeAmount(itemValue);
         }}
@@ -69,7 +71,7 @@ export const ServingPicker = ({
       <Picker
         style={styles.servingTypePicker}
         selectedValue={selectedUnitIndex}
-        itemStyle={{ color: "white" }}
+        itemStyle={{ color: theme.text }}
         onValueChange={(itemValue: number) => {
           changeIndex(itemValue);
         }}

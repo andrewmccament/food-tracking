@@ -3,11 +3,13 @@ import { Redirect, Stack } from "expo-router";
 import React from "react";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 export default function RootLayout() {
+  const theme = useAppTheme();
   const headerStyle = {
     headerStyle: {
-      backgroundColor: "#000000",
+      backgroundColor: theme.surface,
     },
   };
 
@@ -18,10 +20,10 @@ export default function RootLayout() {
           <Stack
             screenOptions={{
               headerStyle: {
-                backgroundColor: "#000000",
+                backgroundColor: theme.surface,
               },
               headerTitleStyle: {
-                color: "white",
+                color: theme.text,
               },
             }}
           >

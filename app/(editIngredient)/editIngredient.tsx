@@ -14,10 +14,11 @@ import { ManualIngredientEditor } from "@/components/EditIngredient/ManualIngred
 import { IngredientSearch } from "@/components/EditIngredient/IngredientSearch";
 import { updateIngredient } from "@/state/foodSlice";
 import { Ingredient } from "@/types/openAi.types";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { ThemedText } from "@/components/ThemedText";
 
 export default function EditIngredientScreen() {
+  const theme = useAppTheme();
   const layout = useWindowDimensions();
   const dispatch = useDispatch();
 
@@ -87,7 +88,7 @@ export default function EditIngredientScreen() {
               style={{
                 ...styles.tabButton,
                 backgroundColor:
-                  index === i ? Colors.themeColorBackground : "black",
+                  index === i ? theme.surfaceRaised : theme.background,
               }}
               onPress={() => setIndex(i)}
             >
@@ -112,7 +113,7 @@ export default function EditIngredientScreen() {
       renderTabBar={renderTabBar}
       onIndexChange={setIndex}
       initialLayout={{ width: layout.width }}
-      style={{ backgroundColor: "white" }}
+      style={{ backgroundColor: theme.background }}
     />
   );
 }

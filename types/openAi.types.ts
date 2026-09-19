@@ -66,7 +66,7 @@ export enum DisplayedMacroTypes {
 export const DisplayedMacroConfig = [
   {
     type: DisplayedMacroTypes.calories,
-    color: "#FF816E",
+    color: Colors.metrics.calories,
     displayName: "Calories",
     unit: " Calories",
     shortUnit: " Cal",
@@ -74,7 +74,7 @@ export const DisplayedMacroConfig = [
   },
   {
     type: DisplayedMacroTypes.carbohydrate,
-    color: "#FFCB6E",
+    color: Colors.metrics.carbohydrate,
     displayName: "Carbs",
     unit: " grams",
     shortUnit: "g",
@@ -82,7 +82,7 @@ export const DisplayedMacroConfig = [
   },
   {
     type: DisplayedMacroTypes.net_carbohydrates,
-    color: "#FFF86E",
+    color: Colors.metrics.net_carbohydrates,
     displayName: "Net Carbs",
     unit: " grams",
     shortUnit: "g",
@@ -90,7 +90,7 @@ export const DisplayedMacroConfig = [
   },
   {
     type: DisplayedMacroTypes.fat,
-    color: "#90FF6E",
+    color: Colors.metrics.fat,
     displayName: "Fat",
     unit: " grams",
     shortUnit: "g",
@@ -98,7 +98,7 @@ export const DisplayedMacroConfig = [
   },
   {
     type: DisplayedMacroTypes.protein,
-    color: "#69CEDF",
+    color: Colors.metrics.protein,
     displayName: "Protein",
     unit: " grams",
     shortUnit: "g",
@@ -106,7 +106,7 @@ export const DisplayedMacroConfig = [
   },
   {
     type: DisplayedMacroTypes.fiber,
-    color: "#6986DF",
+    color: Colors.metrics.fiber,
     displayName: "Fiber",
     unit: " grams",
     shortUnit: "g",
@@ -114,7 +114,7 @@ export const DisplayedMacroConfig = [
   },
   {
     type: DisplayedMacroTypes.sugar,
-    color: "#FF6ED8",
+    color: Colors.metrics.sugar,
     displayName: "Sugar",
     unit: " grams",
     shortUnit: "g",
@@ -151,3 +151,4 @@ export type Recipe = {
     servingName: string;
   };
 };
+import { Colors } from "@/constants/Colors";

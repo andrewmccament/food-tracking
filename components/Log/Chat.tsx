@@ -25,7 +25,7 @@ import { Message, MessageFrom } from "./Message";
 import { Meal } from "@/types/openAi.types";
 import { ButtonStyle, ThemedButton } from "../ThemedButton";
 import SpeakSVG from "../../svg/speak.svg";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useLocalSearchParams } from "expo-router";
 import { RootState } from "@/state/store";
 
@@ -56,6 +56,7 @@ export const Chat = ({
   placeholder = "Type to AI...",
   renderBelowMessages,
 }: ChatProps) => {
+  const theme = useAppTheme();
   const { logMode, initialTranscript } = useLocalSearchParams<{
     logMode?: string;
     initialTranscript?: string;
@@ -272,7 +273,7 @@ export const Chat = ({
     <KeyboardAvoidingView
       behavior="padding"
       keyboardVerticalOffset={90}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
     >
       <ScrollView ref={scrollViewRef}>
         <View>
@@ -300,13 +301,13 @@ export const Chat = ({
               <SpeakSVG
                 width={35}
                 height={35}
-                color={isRecording ? "red" : Colors.themeColor}
+                color={isRecording ? theme.recording : theme.accent}
               />
             </TouchableOpacity>
           </View>
         )}
         <TextInput
-          style={styles.input}
+          style={[styles.input, { borderColor: theme.accent, color: theme.text }]}
           placeholder={placeholder}
           returnKeyType="send"
           blurOnSubmit
@@ -326,7 +327,6 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     flex: 1,
-    backgroundColor: "black",
     padding: 8,
     paddingBottom: 24,
   },
@@ -345,13 +345,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
     borderRadius: 8,
-    borderColor: Colors.themeColor,
     borderWidth: 1,
     minHeight: 44,
     maxHeight: 100,
     fontSize: 18,
     justifyContent: "center",
-    color: "white",
   },
   speakButton: {},
 });

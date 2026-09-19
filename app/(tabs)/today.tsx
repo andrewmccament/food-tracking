@@ -31,11 +31,12 @@ import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
 import { logMeal, recordMeal } from "@/state/foodSlice";
 import AddSVG from "../../svg/log.svg";
 import SpeakSVG from "../../svg/speak.svg";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { LinearGradient } from "react-native-gradients";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function TodayScreen() {
+  const theme = useAppTheme();
   const dispatch = useDispatch();
   const {
     isRecording: isQuickRecording,
@@ -231,7 +232,7 @@ export default function TodayScreen() {
   };
 
   return (
-    <View style={styles.todayContainer}>
+    <View style={[styles.todayContainer, { backgroundColor: theme.background }]}>
       <View
         style={{
           position: "absolute",
@@ -244,9 +245,9 @@ export default function TodayScreen() {
         <LinearGradient
           angle={270}
           colorList={[
-            { offset: "0%", color: "#000000", opacity: "0" },
-            { offset: "80%", color: "#000000", opacity: "0" },
-            { offset: "95%", color: "#000000", opacity: "1" },
+            { offset: "0%", color: theme.background, opacity: "0" },
+            { offset: "80%", color: theme.background, opacity: "0" },
+            { offset: "95%", color: theme.background, opacity: "1" },
           ]}
         />
       </View>
@@ -255,18 +256,18 @@ export default function TodayScreen() {
           {focusedMetrics.map((macro) => (
             <ProgressBar
               key={macro}
-              textColor="white"
+              textColor={theme.text}
               macro={macro}
               amount={todayMacros[macro]}
             />
           ))}
         </View>
       </View>
-      <View style={styles.dailySummary}>
-        <ThemedText type="defaultSemiBold" style={styles.dailySummaryTitle}>
+      <View style={[styles.dailySummary, { backgroundColor: theme.surface }]}>
+        <ThemedText type="defaultSemiBold" style={[styles.dailySummaryTitle, { color: theme.accent }]}>
           Today’s take
         </ThemedText>
-        <ThemedText style={styles.dailySummaryText}>
+        <ThemedText style={[styles.dailySummaryText, { color: theme.text }]}>
           {isCurrentSummary
             ? dailySummary.content
             : isSummarizing
@@ -304,7 +305,7 @@ export default function TodayScreen() {
               onPress={cancelQuickRecordingToChat}
               accessibilityLabel="Cancel recording and open keyboard"
             >
-              <Ionicons name="keypad-outline" size={30} color="white" />
+              <Ionicons name="keypad-outline" size={30} color={theme.text} />
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -317,16 +318,16 @@ export default function TodayScreen() {
           }
         >
           {isQuickTranscribing ? (
-            <ActivityIndicator color={Colors.themeColor} size="large" />
+            <ActivityIndicator color={theme.accent} size="large" />
           ) : isQuickRecording ? (
             <View style={styles.recordingButtonContent}>
-              <SpeakSVG width={80} height={80} color="red" />
-              <ThemedText style={styles.meteringBadge}>
+              <SpeakSVG width={80} height={80} color={theme.recording} />
+              <ThemedText style={[styles.meteringBadge, { backgroundColor: theme.overlay, color: theme.text }]}>
                 {formatDecibels(quickRecordingMetering)}
               </ThemedText>
             </View>
           ) : (
-            <AddSVG width={80} height={80} color={Colors.themeColor} />
+            <AddSVG width={80} height={80} color={theme.accent} />
           )}
         </TouchableOpacity>
       </View>
@@ -342,7 +343,6 @@ const styles = StyleSheet.create({
   todayContainer: {
     flexDirection: "column",
     flex: 1,
-    backgroundColor: "black",
     gap: 12,
     paddingBottom: 12,
   },
@@ -369,15 +369,12 @@ const styles = StyleSheet.create({
   dailySummary: {
     marginHorizontal: 12,
     borderRadius: 10,
-    backgroundColor: "#1c1c1e",
     padding: 12,
   },
   dailySummaryTitle: {
-    color: "#69cedf",
     marginBottom: 4,
   },
   dailySummaryText: {
-    color: "#e6e6e8",
     lineHeight: 20,
   },
   logButton: {
@@ -401,8 +398,6 @@ const styles = StyleSheet.create({
     bottom: 4,
     borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: "#000000cc",
-    color: "white",
     fontSize: 11,
     lineHeight: 16,
     paddingHorizontal: 5,

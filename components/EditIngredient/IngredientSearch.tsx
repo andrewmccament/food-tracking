@@ -4,7 +4,7 @@ import { searchFood } from "@/services/fatsecret";
 import { FoodSearchV1Response } from "@/types/fatSecret.types";
 import { FoodSearchResults } from "@/components/EditIngredient/FoodSearchResults";
 import { Ingredient } from "@/types/openAi.types";
-import { Colors } from "@/constants/Colors";
+import { useAppTheme } from "@/hooks/useAppTheme";
 
 export type IngredientSearchProps = {
   initialSearch?: string;
@@ -15,6 +15,7 @@ export const IngredientSearch = ({
   initialSearch,
   onSelectIngredient,
 }: IngredientSearchProps) => {
+  const theme = useAppTheme();
   const inputRef = React.useRef<TextInput>(null);
   const [searchResults, setSearchResults] =
     React.useState<FoodSearchV1Response>();
@@ -36,13 +37,13 @@ export const IngredientSearch = ({
   }, [initialSearch]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <TextInput
         placeholder="Search"
         returnKeyType="search"
         blurOnSubmit
         ref={inputRef}
-        style={styles.searchBox}
+        style={[styles.searchBox, { borderColor: theme.accent, color: theme.text }]}
         onSubmitEditing={(event) => search(event.nativeEvent.text, true)}
         clearButtonMode={"always"}
       ></TextInput>
@@ -67,16 +68,13 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignItems: "center",
-    backgroundColor: "black",
   },
   searchBox: {
     borderWidth: 1,
     height: 40,
     width: "100%",
     paddingHorizontal: 8,
-    borderColor: Colors.themeColor,
     borderRadius: 8,
     fontSize: 18,
-    color: "white",
   },
 });
