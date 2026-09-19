@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { DisplayedMacros } from "@/types/openAi.types";
+import { DisplayedMacros, DisplayedMacroTypes } from "@/types/openAi.types";
 
 export interface userDataState {
   goals: DisplayedMacros;
   goalCalculationInputs: GoalCalculationInputs;
+  focusedMetrics: DisplayedMacroTypes[];
 }
 
 // These inputs are intentionally separate from the manually editable goals.
@@ -28,11 +29,18 @@ export const defaultUserGoals: DisplayedMacros = {
   sugar: 50,
 };
 
+export const defaultFocusedMetrics: DisplayedMacroTypes[] = [
+  DisplayedMacroTypes.calories,
+  DisplayedMacroTypes.protein,
+  DisplayedMacroTypes.net_carbohydrates,
+];
+
 const initialState: userDataState = {
   goals: defaultUserGoals,
   goalCalculationInputs: {
     sex: "unspecified",
   },
+  focusedMetrics: defaultFocusedMetrics,
 };
 
 export const resetDefaultUserGoals = (state?: Partial<userDataState>) => ({
@@ -50,10 +58,17 @@ export const userDataSlice = createSlice({
         ...action.payload,
       };
     },
+    setFocusedMetrics: (state, action: PayloadAction<DisplayedMacroTypes[]>) => {
+      // A compact summary with no rows is never useful. The UI also enforces
+      // this, but keeping the invariant in state makes every caller safe.
+      if (action.payload.length > 0) {
+        state.focusedMetrics = action.payload;
+      }
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setGoals } = userDataSlice.actions;
+export const { setGoals, setFocusedMetrics } = userDataSlice.actions;
 
 export default userDataSlice.reducer;

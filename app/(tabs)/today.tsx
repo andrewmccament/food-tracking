@@ -12,7 +12,8 @@ import { RootState } from "@/state/store";
 import { getSummedMacros, sortMealsByCategory } from "@/helpers/food-utils";
 import MealSummary from "@/components/Shared/MealSummary";
 import { ProgressBar } from "@/components/Shared/ProgressBar";
-import { DisplayedMacroTypes, Meal } from "@/types/openAi.types";
+import { Meal } from "@/types/openAi.types";
+import { defaultFocusedMetrics } from "@/state/userDataSlice";
 import AddSVG from "../../svg/log.svg";
 import { Colors } from "@/constants/Colors";
 import { LinearGradient } from "react-native-gradients";
@@ -27,6 +28,9 @@ export default function TodayScreen() {
   );
   meals = sortMealsByCategory(meals);
   const todayMacros = getSummedMacros(meals);
+  const focusedMetrics = useSelector(
+    (state: RootState) => state.userData.focusedMetrics ?? defaultFocusedMetrics
+  );
 
   return (
     <View style={styles.todayContainer}>
@@ -50,26 +54,14 @@ export default function TodayScreen() {
       </View>
       <View>
         <View style={styles.macros}>
-          <ProgressBar
-            textColor="white"
-            macro={DisplayedMacroTypes.calories}
-            amount={todayMacros.calories}
-          />
-          <ProgressBar
-            textColor="white"
-            macro={DisplayedMacroTypes.net_carbohydrates}
-            amount={todayMacros.net_carbohydrates}
-          />
-          <ProgressBar
-            textColor="white"
-            macro={DisplayedMacroTypes.fat}
-            amount={todayMacros.fat}
-          />
-          <ProgressBar
-            textColor="white"
-            macro={DisplayedMacroTypes.protein}
-            amount={todayMacros.protein}
-          />
+          {focusedMetrics.map((macro) => (
+            <ProgressBar
+              key={macro}
+              textColor="white"
+              macro={macro}
+              amount={todayMacros[macro]}
+            />
+          ))}
         </View>
       </View>
       <ScrollView>

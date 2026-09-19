@@ -25,6 +25,20 @@ export default function SettingsScreen() {
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.menuItem, styles.menuItemSpaced]}
+        onPress={() => router.push("/settings/focus")}
+        accessibilityRole="button"
+        accessibilityLabel="Focus"
+      >
+        <View>
+          <ThemedText type="defaultSemiBold">Focus</ThemedText>
+          <ThemedText style={styles.description}>
+            Choose the metrics shown in summaries
+          </ThemedText>
+        </View>
+        <ThemedText style={styles.chevron}>›</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.menuItem, styles.menuItemSpaced]}
         onPress={() => router.push("/settings/goals")}
         accessibilityRole="button"
         accessibilityLabel="Goals"

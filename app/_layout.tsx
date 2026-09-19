@@ -61,6 +61,10 @@ export default function RootLayout() {
               name="settings/recipes"
               options={{ headerShown: true, title: "Recipes", ...headerStyle }}
             />
+            <Stack.Screen
+              name="settings/focus"
+              options={{ headerShown: true, title: "Focus", ...headerStyle }}
+            />
           </Stack>
         </PersistGate>
       </Provider>

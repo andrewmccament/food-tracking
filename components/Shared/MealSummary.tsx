@@ -34,6 +34,7 @@ import DoneSVG from "../../svg/done.svg";
 import AddSVG from "../../svg/add.svg";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "../ThemedView";
+import { defaultFocusedMetrics } from "@/state/userDataSlice";
 
 export type MealSummaryProps = {
   mealId: string;
@@ -74,6 +75,9 @@ export default function MealSummary({
 
   const meal = useSelector((state: RootState) => state.food.meals).find(
     (meal: Meal) => meal.mealId === mealId
+  );
+  const focusedMetrics = useSelector(
+    (state: RootState) => state.userData.focusedMetrics ?? defaultFocusedMetrics
   );
 
   React.useEffect(() => setExpanded(editing), [editing]);
@@ -226,38 +230,17 @@ export default function MealSummary({
               ))}
             </Picker>
           )}
-          <ProgressBar
-            macro={DisplayedMacroTypes.calories}
-            amount={
-              meal.recipe
-                ? getRecipeSummedMacros(meal).calories
-                : getSummedMacros([meal]).calories
-            }
-          />
-          <ProgressBar
-            macro={DisplayedMacroTypes.net_carbohydrates}
-            amount={
-              meal.recipe
-                ? getRecipeSummedMacros(meal).net_carbohydrates
-                : getSummedMacros([meal]).net_carbohydrates
-            }
-          />
-          <ProgressBar
-            macro={DisplayedMacroTypes.fat}
-            amount={
-              meal.recipe
-                ? getRecipeSummedMacros(meal).fat
-                : getSummedMacros([meal]).fat
-            }
-          />
-          <ProgressBar
-            macro={DisplayedMacroTypes.protein}
-            amount={
-              meal.recipe
-                ? getRecipeSummedMacros(meal).protein
-                : getSummedMacros([meal]).protein
-            }
-          />
+          {focusedMetrics.map((macro) => (
+            <ProgressBar
+              key={macro}
+              macro={macro}
+              amount={
+                meal.recipe
+                  ? getRecipeSummedMacros(meal)[macro]
+                  : getSummedMacros([meal])[macro]
+              }
+            />
+          ))}
         </View>
       </View>
       {editing ? (
