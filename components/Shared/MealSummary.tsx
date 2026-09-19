@@ -143,7 +143,8 @@ export default function MealSummary({
   };
   return meal ? (
     <ThemedView
-      style={{ ...styles.infoPanel, borderRadius: embedded ? 12 : 12 }}
+      style={{ ...styles.infoPanel, 
+    backgroundColor: theme.surfaceRaised, borderRadius: embedded ? 12 : 12 }}
     >
       <View style={styles.header}>
         {((meal.recipe && !editing) || !meal.recipe) && (
