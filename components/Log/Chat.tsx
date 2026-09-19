@@ -11,11 +11,8 @@ import {
   Alert,
 } from "react-native";
 import {
-  AudioModule,
-  RecordingPresets,
-  setAudioModeAsync,
-  useAudioRecorder,
-} from "expo-audio";
+  useVoiceRecorder,
+} from "@/hooks/useVoiceRecorder";
 import {
   parseMeal,
   parseMealRecipe,
@@ -49,22 +46,28 @@ export const Chat = ({
   placeholder = "Type to AI...",
   renderBelowMessages,
 }: ChatProps) => {
-  const { logMode } = useLocalSearchParams();
+  const { logMode, initialTranscript } = useLocalSearchParams<{
+    logMode?: string;
+    initialTranscript?: string;
+  }>();
   let recipes = useSelector((state: RootState) => state.food.meals).filter(
     (meal: Meal) => meal?.isAdded && meal?.recipe
   );
   const [messages, setMessages] = React.useState<Message[]>([]);
   const messagesRef = React.useRef<Message[]>([]);
-  const [listening, setListening] = React.useState(false);
-  const recording = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const audioBusy = React.useRef(false);
-  const [audioPending, setAudioPending] = React.useState(false);
+  const {
+    isRecording,
+    isBusy: audioPending,
+    startRecording,
+    stopRecording,
+  } = useVoiceRecorder();
   const [transcription, setTranscription] = React.useState<string>();
   const [meal, setMeal] = React.useState<Meal>();
   const dispatch = useDispatch();
 
   const scrollViewRef = React.useRef<ScrollView>(null);
   const inputRef = React.useRef<TextInput>(null);
+  const processedInitialTranscript = React.useRef(false);
 
   React.useEffect(() => {
     // Scroll to the bottom when new messages are added
@@ -78,68 +81,37 @@ export const Chat = ({
   }, [messages]);
 
   const startLogging = async () => {
-    if (audioBusy.current) return;
-    audioBusy.current = true;
-    setAudioPending(true);
-    try {
-      const permission = await AudioModule.requestRecordingPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert("Microphone access needed", "Allow microphone access in Settings, or type your meal below.");
-        return;
-      }
-      await setAudioModeAsync({
-        allowsRecording: true,
-        playsInSilentMode: true,
-      });
-      await recording.prepareToRecordAsync();
-      recording.record();
-      setListening(true);
+    const result = await startRecording();
+    if (result === "started") {
       setMessages((previous) =>
         previous.concat({ from: MessageFrom.USER, contents: "..." })
       );
-    } catch (err) {
-      setListening(false);
+    } else if (result === "permission-denied") {
+      Alert.alert("Microphone access needed", "Allow microphone access in Settings, or type your meal below.");
+    } else {
       Alert.alert("Couldn't start recording", "Please try again or type your meal.");
-    } finally {
-      audioBusy.current = false;
-      setAudioPending(false);
     }
   };
 
-  const stopLogging = async (transcribe = true) => {
-    if (audioBusy.current) return;
-    audioBusy.current = true;
-    setAudioPending(true);
+  const stopLogging = async () => {
     try {
-      await recording.stop();
-      setListening(false);
-      await setAudioModeAsync({ allowsRecording: false });
+      const uri = await stopRecording();
+      if (!uri) throw new Error("Recording has no URI");
 
-      if (transcribe) {
-        const uri = recording.uri;
-        if (uri) {
-          const transcription = await transcribeAudio(uri);
-          if (transcription) {
-            await attemptParseMeal(transcription);
-          } else {
-            setMessages((previous) =>
-              previous.slice(0, -1).concat({
-                from: MessageFrom.GPT,
-                contents:
-                  "I couldn't transcribe that recording. Check the Metro log for the OpenAI error.",
-              })
-            );
-          }
-        } else {
-          throw new Error("Recording has no URI");
-        }
+      const transcription = await transcribeAudio(uri);
+      if (transcription) {
+        await attemptParseMeal(transcription);
+      } else {
+        setMessages((previous) =>
+          previous.slice(0, -1).concat({
+            from: MessageFrom.GPT,
+            contents:
+              "I couldn't transcribe that recording. Check the Metro log for the OpenAI error.",
+          })
+        );
       }
     } catch {
       Alert.alert("Couldn't finish recording", "Please try again or type your meal.");
-    } finally {
-      setListening(false);
-      audioBusy.current = false;
-      setAudioPending(false);
     }
   };
 
@@ -258,6 +230,13 @@ export const Chat = ({
       }
     }
   };
+
+  React.useEffect(() => {
+    if (!initialTranscript || processedInitialTranscript.current) return;
+    processedInitialTranscript.current = true;
+    void attemptParseMeal(initialTranscript, false);
+  }, [initialTranscript]);
+
   return (
     <KeyboardAvoidingView
       behavior="padding"
@@ -281,15 +260,15 @@ export const Chat = ({
         <View style={styles.speakButton}>
           <TouchableOpacity
             disabled={audioPending}
-            accessibilityLabel={listening ? "Stop recording" : "Record meal"}
+            accessibilityLabel={isRecording ? "Stop recording" : "Record meal"}
             onPress={() => {
-              listening ? stopLogging() : startLogging();
+              isRecording ? stopLogging() : startLogging();
             }}
           >
             <SpeakSVG
               width={35}
               height={35}
-              color={listening ? "red" : Colors.themeColor}
+              color={isRecording ? "red" : Colors.themeColor}
             />
           </TouchableOpacity>
         </View>

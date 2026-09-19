@@ -1,5 +1,8 @@
 import React from "react";
 import {
+  ActivityIndicator,
+  Alert,
+  Animated,
   StyleSheet,
   ScrollView,
   View,
@@ -23,13 +26,28 @@ import {
   defaultFocusedMetrics,
   setDailySummary,
 } from "@/state/userDataSlice";
-import { summarizeDay } from "@/services/open-ai";
+import { parseMeal, summarizeDay, transcribeAudio } from "@/services/open-ai";
+import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
+import { logMeal, recordMeal } from "@/state/foodSlice";
 import AddSVG from "../../svg/log.svg";
+import SpeakSVG from "../../svg/speak.svg";
 import { Colors } from "@/constants/Colors";
 import { LinearGradient } from "react-native-gradients";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TodayScreen() {
   const dispatch = useDispatch();
+  const {
+    isRecording: isQuickRecording,
+    isBusy: isQuickRecordingBusy,
+    metering: quickRecordingMetering,
+    startRecording,
+    stopRecording,
+    discardRecording,
+  } = useVoiceRecorder();
+  const [isQuickTranscribing, setIsQuickTranscribing] = React.useState(false);
+  const [quickPreviewMealId, setQuickPreviewMealId] = React.useState<string>();
+  const keyboardBounce = React.useRef(new Animated.Value(0)).current;
   const date = new Date();
   const todayDate = `${date.getFullYear()}${
     date.getMonth() + 1
@@ -137,6 +155,81 @@ export default function TodayScreen() {
     dailySummary?.date === todayDate &&
     dailySummary.inputSignature === summarySignature;
 
+  React.useEffect(() => {
+    if (!isQuickRecording) {
+      keyboardBounce.stopAnimation();
+      keyboardBounce.setValue(0);
+      return;
+    }
+
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(keyboardBounce, {
+          toValue: -8,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+        Animated.timing(keyboardBounce, {
+          toValue: 0,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [isQuickRecording, keyboardBounce]);
+
+  const startQuickRecording = async () => {
+    const result = await startRecording();
+    if (result === "permission-denied") {
+      Alert.alert("Microphone access needed", "Allow microphone access in Settings, or use the keyboard instead.");
+    } else if (result === "error") {
+      Alert.alert("Couldn't start recording", "Please try again or use the keyboard.");
+    }
+  };
+
+  const finishQuickRecording = async () => {
+    const uri = await stopRecording();
+    if (!uri) {
+      Alert.alert("Couldn't finish recording", "Please try again or use the keyboard.");
+      return;
+    }
+
+    setIsQuickTranscribing(true);
+    try {
+      const transcript = await transcribeAudio(uri);
+      if (!transcript) {
+        Alert.alert("Couldn't transcribe that", "Please try again or use the keyboard.");
+        return;
+      }
+
+      const recipes = allMeals.filter((meal) => meal.isAdded && meal.recipe);
+      const response = await parseMeal(transcript, [], recipes);
+      if ("error" in response) {
+        Alert.alert("Couldn't understand that meal", response.error);
+        return;
+      }
+      if (!response.meal) {
+        Alert.alert(
+          "Need a little more detail",
+          response.followUpQuestion ?? "Try describing the meal in a little more detail."
+        );
+        return;
+      }
+
+      dispatch(recordMeal(response));
+      setQuickPreviewMealId(response.mealId);
+    } finally {
+      setIsQuickTranscribing(false);
+    }
+  };
+
+  const cancelQuickRecordingToChat = async () => {
+    await discardRecording();
+    router.push({ pathname: "/(log)/log", params: { logMode: "meal" } });
+  };
+
   return (
     <View style={styles.todayContainer}>
       <View
@@ -183,30 +276,66 @@ export default function TodayScreen() {
       </View>
       <ScrollView>
         <View style={{ ...styles.mealsListContainer }}>
-          {meals.map((meal: Meal, index) => (
-            <View key={index}>
-              <MealSummary mealId={meal.mealId} key={index} />
-            </View>
-          ))}
+          {quickPreviewMealId ? (
+            <MealSummary
+              mealId={quickPreviewMealId}
+              preview
+              onComplete={() => {
+                dispatch(logMeal(quickPreviewMealId));
+                setQuickPreviewMealId(undefined);
+              }}
+            />
+          ) : (
+            meals.map((meal: Meal) => (
+              <MealSummary mealId={meal.mealId} key={meal.mealId} />
+            ))
+          )}
         </View>
       </ScrollView>
       <View style={styles.logButton}>
+        {isQuickRecording && (
+          <Animated.View
+            style={[
+              styles.keyboardShortcut,
+              { transform: [{ translateY: keyboardBounce }] },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={cancelQuickRecordingToChat}
+              accessibilityLabel="Cancel recording and open keyboard"
+            >
+              <Ionicons name="keypad-outline" size={30} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
         <TouchableOpacity
-          onPress={() =>
-            router.push({ pathname: "/(log)/log", params: { logMode: "meal" } })
+          disabled={isQuickRecordingBusy || isQuickTranscribing}
+          onPress={isQuickRecording ? finishQuickRecording : startQuickRecording}
+          style={styles.logButtonPressable}
+          accessibilityLabel={
+            isQuickRecording ? "Stop recording and log food" : "Record food"
           }
-          style={{ zIndex: 1000 }}
         >
-          <AddSVG
-            width={80}
-            height={80}
-            color={Colors.themeColor}
-            style={{ zIndex: 1000 }}
-          />
+          {isQuickTranscribing ? (
+            <ActivityIndicator color={Colors.themeColor} size="large" />
+          ) : isQuickRecording ? (
+            <View style={styles.recordingButtonContent}>
+              <SpeakSVG width={80} height={80} color="red" />
+              <ThemedText style={styles.meteringBadge}>
+                {formatDecibels(quickRecordingMetering)}
+              </ThemedText>
+            </View>
+          ) : (
+            <AddSVG width={80} height={80} color={Colors.themeColor} />
+          )}
         </TouchableOpacity>
       </View>
     </View>
   );
+}
+
+function formatDecibels(metering: number | undefined) {
+  return metering === undefined ? "— dB" : `${Math.round(metering)} dB`;
 }
 
 const styles = StyleSheet.create({
@@ -257,6 +386,33 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     zIndex: 1,
+  },
+  logButtonPressable: {
+    zIndex: 2,
+  },
+  recordingButtonContent: {
+    width: 80,
+    height: 80,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  meteringBadge: {
+    position: "absolute",
+    bottom: 4,
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: "#000000cc",
+    color: "white",
+    fontSize: 11,
+    lineHeight: 16,
+    paddingHorizontal: 5,
+  },
+  keyboardShortcut: {
+    position: "absolute",
+    bottom: 86,
+    width: "100%",
+    alignItems: "center",
+    zIndex: 2,
   },
 
   logButtonGrad: {

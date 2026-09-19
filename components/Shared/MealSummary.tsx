@@ -40,8 +40,10 @@ export type MealSummaryProps = {
   mealId: string;
   allowAdding?: boolean;
   onAdd?: () => void;
+  onComplete?: () => void;
   expandedByDefault?: boolean;
   embedded?: boolean;
+  preview?: boolean;
 };
 
 export type MacroBreakdownProps = { macros: Serving; textStyle?: any };
@@ -66,8 +68,10 @@ export default function MealSummary({
   mealId,
   allowAdding,
   onAdd,
+  onComplete,
   expandedByDefault = false,
   embedded = false,
+  preview = false,
 }: MealSummaryProps) {
   const [expanded, setExpanded] = React.useState(expandedByDefault);
   const [editing, setEditing] = React.useState(false);
@@ -144,11 +148,14 @@ export default function MealSummary({
     >
       <View style={styles.header}>
         {((meal.recipe && !editing) || !meal.recipe) && (
-          <ThemedText type="subtitle" onPress={() => setExpanded(!expanded)}>
+          <ThemedText
+            type="subtitle"
+            onPress={preview ? undefined : () => setExpanded(!expanded)}
+          >
             {capFirstLetter(meal.recipe ? meal.recipe.title : meal.meal)}
           </ThemedText>
         )}
-        {meal.recipe && editing && (
+        {meal.recipe && editing && !preview && (
           <TextInput
             placeholder="Name your recipe..."
             style={styles.titleEdit}
@@ -160,8 +167,17 @@ export default function MealSummary({
           </TextInput>
         )}
         <View style={styles.row}>
-          {editing ? (
-            <TouchableOpacity onPress={() => setEditing(false)}>
+          {preview && onComplete ? (
+            <TouchableOpacity onPress={onComplete} accessibilityLabel="Add meal to today">
+              <DoneSVG width={32} height={32} fill="#4ade80" />
+            </TouchableOpacity>
+          ) : editing ? (
+            <TouchableOpacity
+              onPress={() => {
+                setEditing(false);
+                onComplete?.();
+              }}
+            >
               <DoneSVG
                 width={30}
                 height={30}
@@ -182,7 +198,7 @@ export default function MealSummary({
             </TouchableOpacity>
           )}
 
-          {meal.isAdded && (
+          {!preview && meal.isAdded && (
             <TouchableOpacity onPress={deleteMeal}>
               <DeleteSVG
                 width={30}
@@ -192,14 +208,14 @@ export default function MealSummary({
             </TouchableOpacity>
           )}
 
-          {allowAdding && onAdd && (
+          {!preview && allowAdding && onAdd && (
             <TouchableOpacity onPress={onAdd}>
               <AddSVG width={30} height={30} color={Colors.themeColor} />
             </TouchableOpacity>
           )}
         </View>
       </View>
-      {editing && !meal.recipe && (
+      {editing && !meal.recipe && !preview && (
         <View style={styles.categoryPickerContainer}>
           <Picker
             selectedValue={pickerCategory}
@@ -243,7 +259,7 @@ export default function MealSummary({
           ))}
         </View>
       </View>
-      {editing ? (
+      {editing && !preview ? (
         <TextInput
           style={styles.summaryInputBox}
           value={meal.summary}
@@ -255,7 +271,7 @@ export default function MealSummary({
           {meal.summary}
         </ThemedText>
       )}
-      {expanded && (
+      {expanded && !preview && (
         <ScrollView style={styles.ingredientList}>
           {meal.ingredients.map((ingredient: Ingredient, index: number) => (
             <TouchableOpacity
