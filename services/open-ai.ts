@@ -7,6 +7,8 @@ import { Message, MessageFrom } from "@/components/Log/Message";
 import { Meal } from "@/types/openAi.types";
 import { RECIPE_PARSING_PROMPT } from "@/gpt-prompts/recipe-parsing";
 import { RECIPE_UTILIZATION_PROMPT } from "@/gpt-prompts/recipe-utilization";
+import { DAY_SUMMARY_PROMPT } from "@/gpt-prompts/day-summary";
+import { DisplayedMacros } from "@/types/openAi.types";
 
 const CHAT_MODEL = "gpt-4.1-mini";
 
@@ -50,6 +52,67 @@ export const transcribeAudio = async (audioUri: string) => {
     return responseBody.text as string;
   } catch (err) {
     console.error("Transcription failed:", getOpenAIErrorMessage(err));
+    return null;
+  }
+};
+
+export const summarizeDay = async ({
+  currentTime,
+  goals,
+  consumed,
+}: {
+  currentTime: string;
+  goals: DisplayedMacros;
+  consumed: DisplayedMacros;
+}) => {
+  const startedAt = Date.now();
+  console.info("[day-summary] request started", {
+    currentTime,
+    goals,
+    consumed,
+  });
+
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: CHAT_MODEL,
+        messages: [
+          { role: "system", content: DAY_SUMMARY_PROMPT },
+          {
+            role: "user",
+            content: JSON.stringify({ currentTime, goals, consumed }),
+          },
+        ],
+        response_format: { type: "json_object" },
+      },
+      {
+        headers: {
+          Authorization: AUTHORIZATION,
+          "Content-Type": "application/json",
+        },
+        timeout: 15_000,
+      }
+    );
+    const content = JSON.parse(response.data.choices[0].message.content) as {
+      summary?: string;
+    };
+    const summary = content.summary?.trim() || null;
+    console.info("[day-summary] request completed", {
+      durationMs: Date.now() - startedAt,
+      status: response.status,
+      requestId: response.headers["x-request-id"],
+      hasSummary: Boolean(summary),
+      summaryLength: summary?.length ?? 0,
+    });
+    return summary;
+  } catch (err) {
+    console.error("[day-summary] request failed", {
+      durationMs: Date.now() - startedAt,
+      status: axios.isAxiosError(err) ? err.response?.status : undefined,
+      code: axios.isAxiosError(err) ? err.code : undefined,
+      message: getOpenAIErrorMessage(err),
+    });
     return null;
   }
 };

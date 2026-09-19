@@ -1,11 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { DisplayedMacros, DisplayedMacroTypes } from "@/types/openAi.types";
+import type { DailySummary } from "@/helpers/day-summary";
 
 export interface userDataState {
   goals: DisplayedMacros;
   goalCalculationInputs: GoalCalculationInputs;
   focusedMetrics: DisplayedMacroTypes[];
+  dailySummary: DailySummary | null;
 }
 
 // These inputs are intentionally separate from the manually editable goals.
@@ -41,6 +43,7 @@ const initialState: userDataState = {
     sex: "unspecified",
   },
   focusedMetrics: defaultFocusedMetrics,
+  dailySummary: null,
 };
 
 export const resetDefaultUserGoals = (state?: Partial<userDataState>) => ({
@@ -65,10 +68,14 @@ export const userDataSlice = createSlice({
         state.focusedMetrics = action.payload;
       }
     },
+    setDailySummary: (state, action: PayloadAction<DailySummary>) => {
+      state.dailySummary = action.payload;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setGoals, setFocusedMetrics } = userDataSlice.actions;
+export const { setGoals, setFocusedMetrics, setDailySummary } =
+  userDataSlice.actions;
 
 export default userDataSlice.reducer;
